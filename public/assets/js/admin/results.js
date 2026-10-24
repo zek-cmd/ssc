@@ -654,9 +654,11 @@
                 }
                 card.appendChild(chartWrap);
 
+                var grid = el('div', 'hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4');
+                var mobileList = el('div', 'md:hidden space-y-0');
                 for (var j = 0; j < cands.length; j++) {
                     var c = cands[j];
-                    var row = el('div', 'flex flex-col md:flex-row md:items-center gap-3 md:gap-4 py-3 md:py-4 md:px-4 md:bg-white md:dark:bg-zinc-900 md:rounded-2xl md:shadow-sm md:ring-1 md:ring-zinc-200 md:dark:ring-zinc-800 md:mb-3 border-b border-zinc-100 dark:border-zinc-800 last:border-0 last:md:border-0');
+                    var row = el('div', 'flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800');
                     if (c.is_winning && !resultsHidden) {
                         // winning badge applied after vote count instead of glow
                     }
@@ -697,8 +699,31 @@
                     infoWrap.appendChild(voteCountText);
 
                     row.appendChild(infoWrap);
-                    card.appendChild(row);
+                    grid.appendChild(row);
+
+                    // Mobile compact row
+                    var mobileRow = el('div', 'flex items-start gap-3 py-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0');
+                    mobileRow.setAttribute('data-candidate', c.id);
+                    mobileRow.appendChild(imgWrap.cloneNode(true));
+                    var mobileInfo = el('div', 'flex-1 min-w-0');
+                    var mobileNameRow = el('div', 'flex flex-col gap-1');
+                    mobileNameRow.appendChild(el('span', 'font-semibold text-zinc-900 dark:text-white text-sm', { textContent: c.name }));
+                    if (c.partylist_name) {
+                        var mobilePlSpan = el('span', 'text-[10px] inline-block pl-badge border border-zinc-300 dark:border-zinc-600 rounded px-1.5 py-0.5', {
+                            textContent: c.partylist_name,
+                            'data-partylist-badge': c.partylist_name,
+                            'data-pl-color': c.partylist_badge_color || '#1e40af',
+                            'data-pl-text': c.partylist_badge_text_color || '#ffffff'
+                        });
+                        mobileNameRow.appendChild(mobilePlSpan);
+                    }
+                    mobileInfo.appendChild(mobileNameRow);
+                    mobileInfo.appendChild(el('span', 'text-xs font-medium text-zinc-500 dark:text-zinc-400', { textContent: resultsHidden ? '****** votes' : (c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : '')) }));
+                    mobileRow.appendChild(mobileInfo);
+                    mobileList.appendChild(mobileRow);
                 }
+                card.appendChild(grid);
+                card.appendChild(mobileList);
             }
 
             container.appendChild(card);
