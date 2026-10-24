@@ -697,11 +697,11 @@
                     voteCountText.setAttribute('data-count', c.id);
                     voteCountText.textContent = resultsHidden ? '******' : (c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : ''));
                     if (c.is_winning && !resultsHidden) {
-                        var winningBadge = el('span', 'ml-2 w-fit self-start text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40 md:order-first');
+                        var winningBadge = el('span', 'w-fit self-start text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40');
                         winningBadge.setAttribute('data-winning-badge', c.id);
                         winningBadge.textContent = 'winning';
                         winningBadge.setAttribute('style', 'min-width: 7ch;');
-                        infoWrap.appendChild(winningBadge);
+                        nameRow.appendChild(winningBadge);
                     }
 
                     infoWrap.appendChild(voteCountText);
@@ -833,21 +833,23 @@
                     if (c.is_winning) {
                         // winning badge applied after vote count instead of glow
                         var infoWrap = row.querySelector('.flex-1');
-                        if (infoWrap && !infoWrap.querySelector('[data-winning-badge="' + c.id + '"]')) {
-                            var wb = el('span', 'ml-2 w-fit self-start text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40');
+                        var nameRow = infoWrap ? infoWrap.querySelector('.flex-col.items-center.gap-1') : null;
+                        var targetWrap = nameRow || infoWrap;
+                        if (targetWrap && !targetWrap.querySelector('[data-winning-badge="' + c.id + '"]')) {
+                            var wb = el('span', 'w-fit self-start text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40');
                             wb.setAttribute('data-winning-badge', c.id);
                             wb.textContent = 'winning';
                             wb.setAttribute('style', 'min-width: 7ch;');
-                            var countSpan = infoWrap.querySelector('[data-count="' + c.id + '"]');
-                            if (countSpan && countSpan.parentNode === infoWrap) infoWrap.insertBefore(wb, countSpan);
-                            else infoWrap.appendChild(wb);
+                            targetWrap.appendChild(wb);
                         }
                     } else {
                         if (row.closest && row.closest('.md\\:hidden')) continue;
                         var infoWrap2 = row.querySelector('.flex-1');
                         if (infoWrap2) {
-                            var existing = infoWrap2.querySelector('[data-winning-badge="' + c.id + '"]');
-                            if (existing && existing.parentNode === infoWrap2) infoWrap2.removeChild(existing);
+                            var nameRow2 = infoWrap2.querySelector('.flex-col.items-center.gap-1');
+                            var targetWrap2 = nameRow2 || infoWrap2;
+                            var existing = targetWrap2.querySelector('[data-winning-badge="' + c.id + '"]');
+                            if (existing && existing.parentNode === targetWrap2) targetWrap2.removeChild(existing);
                         }
                         row.style.padding = '';
                         row.style.margin = '';
