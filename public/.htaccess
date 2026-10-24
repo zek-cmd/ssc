@@ -1,0 +1,96 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Redirect to HTTPS (uncomment in production)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+    
+  
+    # If file or directory exists, serve it directly
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+    
+    # Route all other requests to index.php
+    # QSA = append query string, L = last rule (stop processing)
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "DENY"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+# Cache Control for Static Assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 month"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType font/woff "access plus 1 month"
+    ExpiresByType font/woff2 "access plus 1 month"
+    ExpiresByType application/font-woff "access plus 1 month"
+</IfModule>
+
+# Compress output
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript
+    AddOutputFilterByType DEFLATE application/javascript application/json
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# Protect hidden files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Protect sensitive file types
+<FilesMatch "\.(env|sql|log|json|lock|md|yml|yaml|xml|dist)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+
+# ============================================
+# IP ACCESS CONTROL
+# ============================================
+# Uncomment ONE of the blocks below:
+
+# --- WHITELIST: Only these IPs can access the site ---
+# <RequireAll>
+#     Require all denied
+#     <RequireAny>
+#         Require ip 123.45.67.89
+#         Require ip 98.76.54.32
+#         Require ip 192.168.1.0/24
+#     </RequireAny>
+# </RequireAll>
+
+# --- BLACKLIST: Block these IPs, allow everyone else ---
+# <RequireAll>
+#     Require all granted
+#     Require not ip 111.222.333.444
+#     Require not ip 55.66.77.88
+#     Require not ip 203.0.113.0/24
+# </RequireAll>
+
+# Set default charset
+AddDefaultCharset UTF-8
+
+# Prevent directory listing
+Options -Indexes

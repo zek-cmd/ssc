@@ -1,0 +1,49 @@
+{
+    "generated_at": "2026-06-01 07:57:19",
+    "total_fonts": 7,
+    "total_size": 218512,
+    "fonts": [
+        {
+            "filename": "UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7SUc.woff2",
+            "size": 25960,
+            "integrity": "sha384-swBecAL27qLsDDPbdyf4m+eOb3hVqthbGOSWWsQAWGQRrC7Mv26pPhoNQD\/pG+fc",
+            "path": "fonts\/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7SUc.woff2"
+        },
+        {
+            "filename": "UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7SUc.woff2",
+            "size": 18748,
+            "integrity": "sha384-0TIui+vzWhVZMl7iUvLEvfLe0BvgafwfPJsBipXepNH7XIVkp1kGdXEZmLw5x82g",
+            "path": "fonts\/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7SUc.woff2"
+        },
+        {
+            "filename": "UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2ZL7SUc.woff2",
+            "size": 11232,
+            "integrity": "sha384-932mXjo6nQfddER8hP3Xid6Vo+B58AGIF2P8Budgaa2Sufgv0r1MA6Mktb9jLPbt",
+            "path": "fonts\/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2ZL7SUc.woff2"
+        },
+        {
+            "filename": "UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7SUc.woff2",
+            "size": 18996,
+            "integrity": "sha384-JIq1RpVIyHblvpj3nIzOJN4M1Rpvmej5lX\/2ofexSTmh6hYB7ir+QOlIf6IJUzqh",
+            "path": "fonts\/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7SUc.woff2"
+        },
+        {
+            "filename": "UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7SUc.woff2",
+            "size": 10252,
+            "integrity": "sha384-Add\/AMGDcvhLuCRrQsVxY4SzrdqLkUv2MC9f\/lB3IYYM5dCHI0PdX2L2YQmKtcb0",
+            "path": "fonts\/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7SUc.woff2"
+        },
+        {
+            "filename": "UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7SUc.woff2",
+            "size": 85068,
+            "integrity": "sha384-r0EoKgCx3XyQjhJdTJ6FDE+8mEZrV95dM7cWvqLDUVdqzM44cq76qdOaYiA3sebS",
+            "path": "fonts\/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7SUc.woff2"
+        },
+        {
+            "filename": "UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2",
+            "size": 48256,
+            "integrity": "sha384-l0ql7Q1zqvX5klAVRwYjcMVCkCxg5dMTdghsIlC3pYkX6wwEHerh2bP\/4yAao3Im",
+            "path": "fonts\/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2"
+        }
+    ]
+}

@@ -1,0 +1,19 @@
+{
+    "name": "ssc/election-system",
+    "description": "SSC Election Management System",
+    "type": "project",
+    "version": "1.0.0",
+    "require": {
+        "php": ">=8.0",
+        "vlucas/phpdotenv": "^5.7"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}

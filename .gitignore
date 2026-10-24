@@ -1,0 +1,25 @@
+# Environment files
+.env
+.env.local
+.env.production
+
+# Storage
+storage/logs/*
+storage/exports/*
+storage/rate_limits/*
+storage/sessions/*
+
+vendor/
+
+# Additional ignores
+node_modules/
+dist/
+build/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+
+
+bak/
+bin/
