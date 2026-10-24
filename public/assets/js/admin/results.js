@@ -185,6 +185,29 @@
                     if (countSpan) {
                         countSpan.textContent = c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : '');
                     }
+                    // Insert winning badge for desktop cards (inside nameRow) when revealed
+                    if (c.is_winning && !resultsHidden) {
+                        var desktopRow = document.querySelector('[data-candidate="' + c.id + '"]');
+                        if (desktopRow) {
+                            var rowInfo = desktopRow.querySelector('.flex-1');
+                            if (rowInfo) {
+                                var nameRow = rowInfo.querySelector('.flex-col.items-center.gap-1');
+                                if (nameRow && !nameRow.querySelector('[data-winning-badge="' + c.id + '"]')) {
+                                    var wb = document.createElement('span');
+                                    wb.className = 'mx-auto w-fit self-center text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40';
+                                    wb.setAttribute('data-winning-badge', c.id);
+                                    wb.textContent = 'winning';
+                                    wb.style.minWidth = '7ch';
+                                    nameRow.appendChild(wb);
+                                }
+                            }
+                        }
+                        // Mobile winning badge update
+                        var mobileVoteWrap = document.querySelector('.md\\:hidden [data-candidate="' + c.id + '"] .flex.items-center.gap-2');
+                        if (mobileVoteWrap && !mobileVoteWrap.querySelector('[data-winning-badge="' + c.id + '"]')) {
+                            mobileVoteWrap.innerHTML = '<span class="text-xs font-medium text-zinc-500 dark:text-zinc-400" data-count="' + c.id + '">' + (c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : '')) + '</span><span data-winning-badge="' + c.id + '" class="self-start text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40">winning</span>';
+                        }
+                    }
                 }
             }
         }
@@ -836,7 +859,7 @@
                         var nameRow = infoWrap ? infoWrap.querySelector('.flex-col.items-center.gap-1') : null;
                         var targetWrap = nameRow || infoWrap;
                         if (targetWrap && !targetWrap.querySelector('[data-winning-badge="' + c.id + '"]')) {
-                            var wb = el('span', 'w-fit self-start text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40');
+                            var wb = el('span', 'mx-auto w-fit self-center text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40');
                             wb.setAttribute('data-winning-badge', c.id);
                             wb.textContent = 'winning';
                             wb.setAttribute('style', 'min-width: 7ch;');
