@@ -735,7 +735,7 @@
                     mobileInfo.appendChild(mobileNameRow);
                     var voteWrap = document.createElement('div');
                     voteWrap.className = 'flex items-center gap-2';
-                    voteWrap.innerHTML = '<span class="text-xs font-medium text-zinc-500 dark:text-zinc-400" data-count="' + c.id + '">' + (resultsHidden ? '****** votes' : (c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : '')) ) + '</span>' + (c.is_winning && !resultsHidden ? '<span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40">winning</span>' : '');
+                    voteWrap.innerHTML = '<span class="text-xs font-medium text-zinc-500 dark:text-zinc-400" data-count="' + c.id + '">' + (resultsHidden ? '****** votes' : (c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : '')) ) + '</span>' + (c.is_winning && !resultsHidden ? '<span data-winning-badge="' + c.id + '" class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40">winning</span>' : '');
                     mobileInfo.appendChild(voteWrap);
                     mobileRow.appendChild(mobileInfo);
                     mobileList.appendChild(mobileRow);
