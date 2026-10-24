@@ -658,21 +658,21 @@
                 var mobileList = el('div', 'md:hidden space-y-0');
                 for (var j = 0; j < cands.length; j++) {
                     var c = cands[j];
-                    var row = el('div', 'flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800');
+                    var row = el('div', 'flex flex-col items-center text-center gap-4 p-4 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800');
                     if (c.is_winning && !resultsHidden) {
                         // winning badge applied after vote count instead of glow
                     }
                     row.setAttribute('data-candidate', c.id);
 
-                    var imgWrap = el('div', 'shrink-0 w-12 h-12 md:w-14 md:h-14 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden flex items-center justify-center');
+                    var imgWrap = el('div', 'shrink-0 w-24 h-24 md:w-32 md:h-32 bg-zinc-100 dark:bg-zinc-800 rounded-3xl overflow-hidden flex items-center justify-center');
                     if (c.image_path) {
                         imgWrap.appendChild(el('img', 'w-full h-full object-cover', { src: candidateImagesUrl + '/' + c.image_path, alt: c.name }));
                     }
                     row.appendChild(imgWrap);
 
-                    var infoWrap = el('div', 'flex-1 min-w-0 flex flex-col md:flex-row md:items-center md:justify-between gap-2.5 md:gap-4');
+                    var infoWrap = el('div', 'flex-1 min-w-0 flex flex-col items-center text-center gap-2');
 
-                    var nameRow = el('div', 'flex flex-col md:flex-row md:items-center gap-1 md:gap-2');
+                    var nameRow = el('div', 'flex flex-col items-center gap-1');
                     nameRow.appendChild(el('span', 'font-semibold text-zinc-900 dark:text-white text-base md:text-lg', { textContent: c.name }));
                     if (c.partylist_name) {
                         var plSpan = el('span', 'text-sm self-start pl-badge border border-zinc-300 dark:border-zinc-600 rounded-lg px-[6px] py-[2px] rounded-[6px] inline-block', {
