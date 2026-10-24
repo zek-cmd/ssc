@@ -724,7 +724,7 @@
                     var mobileNameRow = el('div', 'flex flex-col gap-1');
                     mobileNameRow.appendChild(el('span', 'font-semibold text-zinc-900 dark:text-white text-sm', { textContent: c.name }));
                     if (c.partylist_name) {
-                        var mobilePlSpan = el('span', 'text-[10px] inline-block pl-badge border border-zinc-300 dark:border-zinc-600 rounded px-1.5 py-0.5 self-center', {
+                        var mobilePlSpan = el('span', 'text-[10px] inline-block pl-badge border border-zinc-300 dark:border-zinc-600 rounded px-1.5 py-0.5 self-start', {
                             textContent: c.partylist_name,
                             'data-partylist-badge': c.partylist_name,
                             'data-pl-color': c.partylist_badge_color || '#1e40af',
@@ -735,7 +735,7 @@
                     mobileInfo.appendChild(mobileNameRow);
                     var voteWrap = document.createElement('div');
                     voteWrap.className = 'flex items-center gap-2';
-                    voteWrap.innerHTML = '<span class="text-xs font-medium text-zinc-500 dark:text-zinc-400" data-count="' + c.id + '">' + (resultsHidden ? '****** votes' : (c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : '')) ) + '</span>' + (c.is_winning && !resultsHidden ? '<span data-winning-badge="' + c.id + '" class="mx-auto text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40">winning</span>' : '');
+                    voteWrap.innerHTML = '<span class="text-xs font-medium text-zinc-500 dark:text-zinc-400" data-count="' + c.id + '">' + (resultsHidden ? '****** votes' : (c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : '')) ) + '</span>' + (c.is_winning && !resultsHidden ? '<span data-winning-badge="' + c.id + '" class="self-start text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40">winning</span>' : '');
                     mobileInfo.appendChild(voteWrap);
                     mobileRow.appendChild(mobileInfo);
                     mobileList.appendChild(mobileRow);
@@ -865,7 +865,7 @@
                         var mVoteWrap2 = mR2.querySelector('[data-count="' + c.id + '"]');
                         if (mVoteWrap2 && mVoteWrap2.parentNode) {
                             var parentWrap = mVoteWrap2.parentNode;
-                            parentWrap.innerHTML = '<span class="text-xs font-medium text-zinc-500 dark:text-zinc-400" data-count="' + c.id + '">' + (resultsHidden ? '****** votes' : (c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : '')) ) + '</span>' + (c.is_winning && !resultsHidden ? '<span data-winning-badge="' + c.id + '" class="mx-auto text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40">winning</span>' : '');
+                            parentWrap.innerHTML = '<span class="text-xs font-medium text-zinc-500 dark:text-zinc-400" data-count="' + c.id + '">' + (resultsHidden ? '****** votes' : (c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : '')) ) + '</span>' + (c.is_winning && !resultsHidden ? '<span data-winning-badge="' + c.id + '" class="self-start text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40">winning</span>' : '');
                         }
                     }
                 }
