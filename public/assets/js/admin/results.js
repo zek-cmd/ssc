@@ -828,6 +828,8 @@
                 var rows = document.querySelectorAll('[data-candidate="' + c.id + '"]');
                 for (var r = 0; r < rows.length; r++) {
                     var row = rows[r];
+                    // Skip mobile rows; mobile handled separately
+                    if (row.closest && row.closest('.md\\:hidden')) continue;
                     if (c.is_winning) {
                         // winning badge applied after vote count instead of glow
                         var infoWrap = row.querySelector('.flex-1');
@@ -841,6 +843,7 @@
                             else infoWrap.appendChild(wb);
                         }
                     } else {
+                        if (row.closest && row.closest('.md\\:hidden')) continue;
                         var infoWrap2 = row.querySelector('.flex-1');
                         if (infoWrap2) {
                             var existing = infoWrap2.querySelector('[data-winning-badge="' + c.id + '"]');
