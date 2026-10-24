@@ -837,14 +837,14 @@
                             wb.textContent = 'winning';
                             wb.setAttribute('style', 'min-width: 7ch;');
                             var countSpan = infoWrap.querySelector('[data-count="' + c.id + '"]');
-                            if (countSpan) infoWrap.insertBefore(wb, countSpan);
+                            if (countSpan && countSpan.parentNode === infoWrap) infoWrap.insertBefore(wb, countSpan);
                             else infoWrap.appendChild(wb);
                         }
                     } else {
                         var infoWrap2 = row.querySelector('.flex-1');
                         if (infoWrap2) {
                             var existing = infoWrap2.querySelector('[data-winning-badge="' + c.id + '"]');
-                            if (existing) infoWrap2.removeChild(existing);
+                            if (existing && existing.parentNode === infoWrap2) infoWrap2.removeChild(existing);
                         }
                         row.style.padding = '';
                         row.style.margin = '';
@@ -857,9 +857,10 @@
                 for (var mr2 = 0; mr2 < mobileRows2.length; mr2++) {
                     var mR2 = mobileRows2[mr2];
                     if (mR2.closest && mR2.closest('.md\\:hidden')) {
-                        var mVoteWrap2 = mR2.querySelector('.flex.items-center.gap-2');
-                        if (mVoteWrap2) {
-                            mVoteWrap2.innerHTML = '<span class="text-xs font-medium text-zinc-500 dark:text-zinc-400" data-count="' + c.id + '">' + (resultsHidden ? '****** votes' : (c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : '')) ) + '</span>' + (c.is_winning && !resultsHidden ? '<span data-winning-badge="' + c.id + '" class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40">winning</span>' : '');
+                        var mVoteWrap2 = mR2.querySelector('[data-count="' + c.id + '"]');
+                        if (mVoteWrap2 && mVoteWrap2.parentNode) {
+                            var parentWrap = mVoteWrap2.parentNode;
+                            parentWrap.innerHTML = '<span class="text-xs font-medium text-zinc-500 dark:text-zinc-400" data-count="' + c.id + '">' + (resultsHidden ? '****** votes' : (c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : '')) ) + '</span>' + (c.is_winning && !resultsHidden ? '<span data-winning-badge="' + c.id + '" class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40">winning</span>' : '');
                         }
                     }
                 }
