@@ -656,7 +656,7 @@
 
                 for (var j = 0; j < cands.length; j++) {
                     var c = cands[j];
-                    var row = el('div', 'flex items-start gap-4 py-3 border-b border-zinc-100 dark:border-zinc-800 last:border-0');
+                    var row = el('div', 'flex flex-col md:flex-row md:items-center gap-3 md:gap-4 py-3 md:py-4 md:px-4 md:bg-white md:dark:bg-zinc-900 md:rounded-2xl md:shadow-sm md:ring-1 md:ring-zinc-200 md:dark:ring-zinc-800 md:mb-3 border-b border-zinc-100 dark:border-zinc-800 last:border-0 last:md:border-0');
                     if (c.is_winning && !resultsHidden) {
                         // winning badge applied after vote count instead of glow
                     }
