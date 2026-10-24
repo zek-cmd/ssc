@@ -214,13 +214,13 @@ class EmailService {
         $votedAt = $voteData['voted_at'] ?? date('F j, Y g:i A');
         $selections = $voteData['named_vote_data'] ?? [];
         
-        $html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><style>
+        $html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><style>
             @media (prefers-color-scheme: dark) {
-                .partylist { color: inherit !important; }
-                body { background: #111827 !important; }
+                .partylist { color: inherit !important; forced-color-adjust: none; -webkit-text-size-adjust: 100%; }
+                body { background: #111827 !important; forced-color-adjust: none; }
                 .container { background: #1f2937 !important; box-shadow: none !important; }
             }
-            body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+            body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; color-scheme: light; forced-color-adjust: none; }
             .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 30px; }
             .header { text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
             .header h2 { color: #1e40af; margin: 0; }
