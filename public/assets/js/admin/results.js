@@ -664,7 +664,7 @@
                     }
                     row.setAttribute('data-candidate', c.id);
 
-                    var imgWrap = el('div', 'shrink-0 w-24 h-24 md:w-32 md:h-32 bg-zinc-100 dark:bg-zinc-800 rounded-3xl overflow-hidden flex items-center justify-center');
+                    var imgWrap = el('div', 'shrink-0 w-32 h-32 md:w-48 md:h-48 lg:w-56 lg:h-56 bg-zinc-100 dark:bg-zinc-800 rounded-3xl overflow-hidden flex items-center justify-center');
                     if (c.image_path) {
                         imgWrap.appendChild(el('img', 'w-full h-full object-cover', { src: candidateImagesUrl + '/' + c.image_path, alt: c.name }));
                     }
