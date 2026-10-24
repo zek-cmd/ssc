@@ -683,7 +683,7 @@
                     var nameRow = el('div', 'flex flex-col items-center gap-1');
                     nameRow.appendChild(el('span', 'font-semibold text-zinc-900 dark:text-white text-base md:text-lg', { textContent: c.name }));
                     if (c.partylist_name) {
-                        var plSpan = el('span', 'text-sm self-start pl-badge border border-zinc-300 dark:border-zinc-600 rounded-lg px-[6px] py-[2px] rounded-[6px] inline-block', {
+                        var plSpan = el('span', 'text-sm self-center pl-badge border border-zinc-300 dark:border-zinc-600 rounded-lg px-[6px] py-[2px] rounded-[6px] inline-block', {
                             textContent: c.partylist_name,
                             'data-partylist-badge': c.partylist_name,
                             'data-pl-color': c.partylist_badge_color || '#1e40af',
@@ -724,7 +724,7 @@
                     var mobileNameRow = el('div', 'flex flex-col gap-1');
                     mobileNameRow.appendChild(el('span', 'font-semibold text-zinc-900 dark:text-white text-sm', { textContent: c.name }));
                     if (c.partylist_name) {
-                        var mobilePlSpan = el('span', 'text-[10px] inline-block pl-badge border border-zinc-300 dark:border-zinc-600 rounded px-1.5 py-0.5 self-start', {
+                        var mobilePlSpan = el('span', 'text-[10px] inline-block pl-badge border border-zinc-300 dark:border-zinc-600 rounded px-1.5 py-0.5 self-center', {
                             textContent: c.partylist_name,
                             'data-partylist-badge': c.partylist_name,
                             'data-pl-color': c.partylist_badge_color || '#1e40af',
