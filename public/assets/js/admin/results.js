@@ -825,8 +825,9 @@
                 var counts = document.querySelectorAll('[data-count="' + c.id + '"]');
                 for (var n = 0; n < counts.length; n++) counts[n].textContent = c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : '');
 
-                var row = document.querySelector('[data-candidate="' + c.id + '"]');
-                if (row) {
+                var rows = document.querySelectorAll('[data-candidate="' + c.id + '"]');
+                for (var r = 0; r < rows.length; r++) {
+                    var row = rows[r];
                     if (c.is_winning) {
                         // winning badge applied after vote count instead of glow
                         var infoWrap = row.querySelector('.flex-1');
