@@ -201,12 +201,25 @@ class EmailService {
         return $stmt->rowCount();
     }
     
+    private function getDBBadgeColors($partylistName) {
+        if (empty($partylistName)) return ['bg' => null, 'fg' => null];
+        $stmt = $this->pdo->prepare("SELECT badge_color, badge_text_color FROM partylists WHERE name = ? LIMIT 1");
+        $stmt->execute([$partylistName]);
+        $row = $stmt->fetch();
+        return $row ? ['bg' => $row['badge_color'], 'fg' => $row['badge_text_color']] : ['bg' => null, 'fg' => null];
+    }
+
     private function buildReceiptHTML($voterId, $voteData) {
         $voterName = $voteData['voter_name'] ?? '';
         $votedAt = $voteData['voted_at'] ?? date('F j, Y g:i A');
         $selections = $voteData['named_vote_data'] ?? [];
         
-        $html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+        $html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><style>
+            @media (prefers-color-scheme: dark) {
+                .partylist { color: inherit !important; }
+                body { background: #111827 !important; }
+                .container { background: #1f2937 !important; box-shadow: none !important; }
+            }
             body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
             .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 30px; }
             .header { text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
@@ -232,14 +245,25 @@ class EmailService {
         foreach ($selections as $position => $data) {
             $candidateName = is_array($data) ? ($data['candidate_name'] ?? '') : $data;
             $partylistName = is_array($data) ? ($data['partylist_name'] ?? '') : '';
-            $badgeColor = is_array($data) ? ($data['partylist_badge_color'] ?? '#1e40af') : '#1e40af';
-            $badgeTextColor = is_array($data) ? ($data['partylist_badge_text_color'] ?? '#ffffff') : '#ffffff';
-            
-            $html .= '<div class="position-card"><p class="position-name">' . htmlspecialchars($position) . '</p><p class="candidate-name">' . htmlspecialchars($candidateName);
+            $badges = [];
             if ($partylistName) {
-                $bg = $badgeColor ? $badgeColor : '#dbeafe';
-                $fg = $badgeTextColor ? $badgeTextColor : '#1e40af';
-                $html .= '<span class="partylist" style="background:' . htmlspecialchars($bg) . ';color:' . htmlspecialchars($fg) . ';">' . htmlspecialchars($partylistName) . '</span>';
+                $dbCol = $this->getDBBadgeColors($partylistName);
+                if (!$dbCol['bg'] || !$dbCol['fg']) {
+                    // Fall back to voteData if DB lookup misses (shouldn't happen normally)
+                    $badgeColor = $data['partylist_badge_color'] ?? '#1e40af';
+                    $badgeTextColor = $data['partylist_badge_text_color'] ?? '#ffffff';
+                } else {
+                    $badgeColor = $dbCol['bg'];
+                    $badgeTextColor = $dbCol['fg'];
+                }
+                $badges = ['bg' => $badgeColor, 'fg' => $badgeTextColor];
+            } else {
+                $badges = ['bg' => null, 'fg' => null];
+            }
+
+            $html .= '<div class="position-card"><p class="position-name">' . htmlspecialchars($position) . '</p><p class="candidate-name">' . htmlspecialchars($candidateName);
+            if ($badges['bg']) {
+                $html .= '<span class="partylist" style="background:' . htmlspecialchars($badges['bg']) . '!important;color:' . htmlspecialchars($badges['fg']) . '!important;">' . htmlspecialchars($partylistName) . '</span>';
             }
             $html .= '</p></div>';
         }
@@ -262,8 +286,13 @@ class EmailService {
         foreach ($selections as $position => $data) {
             $candidateName = is_array($data) ? ($data['candidate_name'] ?? '') : $data;
             $partylistName = is_array($data) ? ($data['partylist_name'] ?? '') : '';
-            $badgeColor = is_array($data) ? ($data['partylist_badge_color'] ?? '#1e40af') : '#1e40af';
-            $badgeTextColor = is_array($data) ? ($data['partylist_badge_text_color'] ?? '#ffffff') : '#ffffff';
+            $badgeColor = '#1e40af';
+            $badgeTextColor = '#ffffff';
+            if ($partylistName) {
+                $dbCol = $this->getDBBadgeColors($partylistName);
+                $badgeColor = ($dbCol['bg'] && $dbCol['fg']) ? $dbCol['bg'] : ($data['partylist_badge_color'] ?? '#1e40af');
+                $badgeTextColor = ($dbCol['bg'] && $dbCol['fg']) ? $dbCol['fg'] : ($data['partylist_badge_text_color'] ?? '#ffffff');
+            }
             $text .= "{$position}: {$candidateName}";
             if ($partylistName) $text .= " | Partylist: {$partylistName} (badge color: {$badgeColor}, text color: {$badgeTextColor})";
             $text .= "\n";
