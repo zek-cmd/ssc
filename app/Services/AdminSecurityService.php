@@ -39,6 +39,7 @@ class AdminSecurityService {
         $csp = "default-src 'self'; ";
         $csp .= "script-src 'self' 'nonce-{$nonce}' https://challenges.cloudflare.com; ";
         $csp .= "style-src 'self' 'unsafe-inline' 'nonce-{$nonce}'; ";
+        $csp .= "style-src-attr 'self' 'unsafe-inline'; ";
         $csp .= "font-src 'self'; ";
         $csp .= "img-src 'self' data: blob: https:; ";
         $csp .= "connect-src 'self' https://challenges.cloudflare.com; ";

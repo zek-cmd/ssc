@@ -179,10 +179,9 @@
                                 var nameRow = rowInfo.querySelector('.flex-col.items-center.gap-1');
                                 if (nameRow && !nameRow.querySelector('[data-winning-badge="' + c.id + '"]')) {
                                     var wb = document.createElement('span');
-                                    wb.className = 'mx-auto w-fit self-center text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40';
+                                    wb.className = 'mx-auto w-fit self-center min-w-[7ch] text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40';
                                     wb.setAttribute('data-winning-badge', c.id);
                                     wb.textContent = 'winning';
-                                    wb.style.minWidth = '7ch';
                                     nameRow.appendChild(wb);
                                 }
                             }
@@ -227,10 +226,9 @@
                         var sInfo = sRow.querySelector('.flex-1');
                         if (sc.is_winning) {
                             if (sInfo && !sInfo.querySelector('[data-winning-badge="' + sc.id + '"]')) {
-                                var swb = el('span', 'ml-2 w-fit self-start text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40');
+                                var swb = el('span', 'ml-2 w-fit self-start min-w-[7ch] text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40');
                                 swb.setAttribute('data-winning-badge', sc.id);
                                 swb.textContent = 'winning';
-                                swb.setAttribute('style', 'min-width: 7ch;');
                                 var sCount = sInfo.querySelector('[data-count="' + sc.id + '"]');
                                 if (sCount) sInfo.insertBefore(swb, sCount);
                                 else sInfo.appendChild(swb);
@@ -700,10 +698,9 @@
                     voteCountText.setAttribute('data-count', c.id);
                     voteCountText.textContent = resultsHidden ? '******' : (c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : ''));
                     if (c.is_winning && !resultsHidden) {
-                        var winningBadge = el('span', 'mx-auto w-fit self-center text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40');
+                        var winningBadge = el('span', 'mx-auto w-fit self-center min-w-[7ch] text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40');
                         winningBadge.setAttribute('data-winning-badge', c.id);
                         winningBadge.textContent = 'winning';
-                        winningBadge.setAttribute('style', 'min-width: 7ch;');
                         nameRow.appendChild(winningBadge);
                     }
 
@@ -836,10 +833,9 @@
                         var nameRow = infoWrap ? infoWrap.querySelector('.flex-col.items-center.gap-1') : null;
                         var targetWrap = nameRow || infoWrap;
                         if (targetWrap && !targetWrap.querySelector('[data-winning-badge="' + c.id + '"]')) {
-                            var wb = el('span', 'mx-auto w-fit self-center text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40');
+                            var wb = el('span', 'mx-auto w-fit self-center min-w-[7ch] text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-300/40');
                             wb.setAttribute('data-winning-badge', c.id);
                             wb.textContent = 'winning';
-                            wb.setAttribute('style', 'min-width: 7ch;');
                             targetWrap.appendChild(wb);
                         }
                     } else {
