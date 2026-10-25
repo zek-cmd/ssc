@@ -125,9 +125,45 @@
         charts = {};
     }
 
+    function buildPositionWinning(pos) {
+        var cands = pos.candidates || [];
+        var winners = [];
+        for (var i = 0; i < cands.length; i++) {
+            if (cands[i].is_winning) winners.push(cands[i].name);
+        }
+        if (!winners.length) return null;
+
+        var span = el('span', 'hidden md:inline-block text-sm font-semibold text-amber-600 dark:text-amber-400 whitespace-nowrap');
+        span.setAttribute('data-position-winning', pos.id);
+        span.textContent = 'WINNING: ' + winners.join(', ');
+        return span;
+    }
+
+    function refreshPositionWinning(pos) {
+        var card = document.querySelector('[data-position="' + pos.id + '"]');
+        if (!card) return;
+        var header = card.querySelector('h3');
+        if (!header) return;
+
+        var existing = header.querySelector('[data-position-winning="' + pos.id + '"]');
+        var fresh = resultsHidden ? null : buildPositionWinning(pos);
+
+        if (!fresh) {
+            if (existing) existing.parentNode.removeChild(existing);
+            return;
+        }
+        if (existing) existing.textContent = fresh.textContent;
+        else header.appendChild(fresh);
+    }
+
     function maskAllResults() {
         var totalVotesEl = document.getElementById('totalVotes');
         if (totalVotesEl) totalVotesEl.textContent = '******';
+
+        var posWinSpans = document.querySelectorAll('[data-position-winning]');
+        for (var pw = 0; pw < posWinSpans.length; pw++) {
+            posWinSpans[pw].parentElement.removeChild(posWinSpans[pw]);
+        }
 
         var countSpans = document.querySelectorAll('[data-count]');
         for (var j = 0; j < countSpans.length; j++) {
@@ -163,6 +199,7 @@
 
         if (latestData.positions) {
             for (var j = 0; j < latestData.positions.length; j++) {
+                refreshPositionWinning(latestData.positions[j]);
                 var posCandidates = latestData.positions[j].candidates || [];
                 for (var k = 0; k < posCandidates.length; k++) {
                     var c = posCandidates[k];
@@ -634,8 +671,12 @@
             var card = el('div', 'card');
             card.setAttribute('data-position', pos.id);
 
-            var header = el('h3', 'text-xl font-bold text-zinc-900 dark:text-white mb-4 pb-2 border-b border-zinc-200/60 dark:border-zinc-800/60');
-            header.textContent = pos.name;
+            var header = el('h3', 'text-xl font-bold text-zinc-900 dark:text-white mb-4 pb-2 border-b border-zinc-200/60 dark:border-zinc-800/60 flex items-baseline justify-between gap-3');
+            header.appendChild(el('span', null, { textContent: pos.name }));
+            if (!resultsHidden) {
+                var posWinning = buildPositionWinning(pos);
+                if (posWinning) header.appendChild(posWinning);
+            }
             card.appendChild(header);
 
             if (cands.length === 0) {
@@ -796,6 +837,8 @@
         for (var i = 0; i < data.positions.length; i++) {
             var pos = data.positions[i];
             var cands = pos.candidates || [];
+
+            refreshPositionWinning(pos);
 
             if (cands.length > 0) {
                 if (charts[pos.id]) {
