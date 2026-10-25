@@ -129,11 +129,6 @@
         var totalVotesEl = document.getElementById('totalVotes');
         if (totalVotesEl) totalVotesEl.textContent = '******';
 
-        var voteSpans = document.querySelectorAll('[data-votes]');
-        for (var i = 0; i < voteSpans.length; i++) {
-            voteSpans[i].textContent = '(******)';
-        }
-
         var countSpans = document.querySelectorAll('[data-count]');
         for (var j = 0; j < countSpans.length; j++) {
             countSpans[j].textContent = '******';
@@ -164,16 +159,6 @@
         var totalVotesEl = document.getElementById('totalVotes');
         if (totalVotesEl && latestData.total_votes !== undefined) {
             totalVotesEl.textContent = latestData.total_votes.toLocaleString();
-        }
-
-        if (latestData.positions) {
-            for (var i = 0; i < latestData.positions.length; i++) {
-                var pos = latestData.positions[i];
-                var voteSpan = document.querySelector('[data-votes="' + pos.id + '"]');
-                if (voteSpan) {
-                    voteSpan.textContent = '(' + pos.total_votes + ' vote' + (pos.total_votes !== 1 ? 's' : '') + ')';
-                }
-            }
         }
 
         if (latestData.positions) {
@@ -647,17 +632,12 @@
         for (var i = 0; i < data.positions.length; i++) {
             var pos = data.positions[i];
             var cands = pos.candidates || [];
-            var totalVotes = pos.total_votes || 0;
 
             var card = el('div', 'card');
             card.setAttribute('data-position', pos.id);
 
             var header = el('h3', 'text-xl font-bold text-zinc-900 dark:text-white mb-4 pb-2 border-b border-zinc-200/60 dark:border-zinc-800/60');
-            header.textContent = pos.name + ' ';
-            var voteSpan = el('span', 'text-sm font-normal text-zinc-500');
-            voteSpan.setAttribute('data-votes', pos.id);
-            voteSpan.textContent = resultsHidden ? '(******)' : ('(' + totalVotes + ' vote' + (totalVotes !== 1 ? 's' : '') + ')');
-            header.appendChild(voteSpan);
+            header.textContent = pos.name;
             card.appendChild(header);
 
             if (cands.length === 0) {
@@ -819,9 +799,6 @@
         for (var i = 0; i < data.positions.length; i++) {
             var pos = data.positions[i];
             var cands = pos.candidates || [];
-
-            var votesEl = document.querySelector('[data-votes="' + pos.id + '"]');
-            if (votesEl) votesEl.textContent = '(' + pos.total_votes + ' vote' + (pos.total_votes !== 1 ? 's' : '') + ')';
 
             if (cands.length > 0) {
                 if (charts[pos.id]) {
