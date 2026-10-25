@@ -687,9 +687,9 @@
                     }
                     row.setAttribute('data-candidate', c.id);
 
-                    var imgWrap = el('div', 'w-full h-32 md:h-48 lg:h-56 bg-zinc-100 dark:bg-zinc-800 rounded-3xl overflow-hidden flex items-center justify-center');
+                    var imgWrap = el('div', 'w-full aspect-[3/4] max-h-80 bg-zinc-100 dark:bg-zinc-800 rounded-3xl overflow-hidden flex items-center justify-center');
                     if (c.image_path) {
-                        imgWrap.appendChild(el('img', 'w-full h-full max-w-full max-h-full object-contain', { src: candidateImagesUrl + '/' + c.image_path, alt: c.name }));
+                        imgWrap.appendChild(el('img', 'block w-full h-full object-contain', { src: candidateImagesUrl + '/' + c.image_path, alt: c.name }));
                     } else {
                         var phSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                         phSvg.setAttribute('class', 'w-16 h-16 md:w-20 md:h-20 text-zinc-400');
