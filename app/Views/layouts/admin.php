@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($title) ?></title>
     <link rel="icon" type="image/x-icon" href="<?= APP_URL ?>/favicon.ico">
+    <link href="<?= \App\Services\AdminSecurityService::asset('local/css/montserrat-font.css') ?>" rel="stylesheet" nonce="<?= htmlspecialchars($nonce) ?>">
     <link href="<?= \App\Services\AdminSecurityService::asset('css/tailwind.min.css') ?>" rel="stylesheet" nonce="<?= htmlspecialchars($nonce) ?>">
 
     <style nonce="<?= htmlspecialchars($nonce) ?>">

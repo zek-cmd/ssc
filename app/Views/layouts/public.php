@@ -6,6 +6,7 @@
     <title><?= htmlspecialchars($title) ?></title>
     <link rel="icon" type="image/x-icon" href="<?= APP_URL ?>/favicon.ico">
     
+    <link href="<?= \App\Services\SecurityService::asset('local/css/montserrat-font.css') ?>" rel="stylesheet" nonce="<?= htmlspecialchars(\App\Services\SecurityService::getNonce()) ?>">
     <link href="<?= \App\Services\SecurityService::asset('css/tailwind.min.css') ?>" rel="stylesheet" nonce="<?= htmlspecialchars(\App\Services\SecurityService::getNonce()) ?>">
 
     <style nonce="<?= htmlspecialchars(\App\Services\SecurityService::getNonce()) ?>">
