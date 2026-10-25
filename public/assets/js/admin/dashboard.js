@@ -520,6 +520,8 @@ if (positionSearch) {
             if (isSuperAdmin) {
                 var cbs = document.querySelectorAll('.pos-cb');
                 for (var j = 0; j < cbs.length; j++) { cbs[j].addEventListener('change', function() { if (this.checked) selected.positions.add(this.value); else selected.positions.delete(this.value); updateBulkBtn('positions', '.bulk-delete-positions'); }); }
+                var saPos = document.querySelector('.select-all-positions');
+                if (saPos) saPos.checked = false;
                 var editBtns = document.querySelectorAll('#positionsTableBody .edit-btn');
                 for (var k = 0; k < editBtns.length; k++) { editBtns[k].addEventListener('click', function() { openPositionModal(this.dataset.id, this.dataset.name, this.dataset.desc); }); }
                 var delBtns = document.querySelectorAll('#positionsTableBody .del-btn');
@@ -660,6 +662,8 @@ if (candidateSearch) {
             if (isSuperAdmin) {
                 var cbs = document.querySelectorAll('.cand-cb');
                 for (var j = 0; j < cbs.length; j++) { cbs[j].addEventListener('change', function() { if (this.checked) selected.candidates.add(this.value); else selected.candidates.delete(this.value); updateBulkBtn('candidates', '.bulk-delete-candidates'); }); }
+                var saCand = document.querySelector('.select-all-candidates');
+                if (saCand) saCand.checked = false;
                 var editBtns = document.querySelectorAll('#candidatesTableBody .edit-btn');
                 for (var k = 0; k < editBtns.length; k++) { editBtns[k].addEventListener('click', function() { openCandidateModal(this.dataset.id, this.dataset.name, this.dataset.pos, this.dataset.pl, this.dataset.platform, this.dataset.image); }); }
                 var delBtns = document.querySelectorAll('#candidatesTableBody .del-btn');
@@ -790,6 +794,8 @@ if (partylistSearch) {
             if (isSuperAdmin) {
                 var cbs = document.querySelectorAll('.pl-cb');
                 for (var j = 0; j < cbs.length; j++) { cbs[j].addEventListener('change', function() { if (this.checked) selected.partylists.add(this.value); else selected.partylists.delete(this.value); updateBulkBtn('partylists', '.bulk-delete-partylists'); }); }
+                var saPl = document.querySelector('.select-all-partylists');
+                if (saPl) saPl.checked = false;
                 var editBtns = document.querySelectorAll('#partylistsTableBody .edit-btn');
                 for (var k = 0; k < editBtns.length; k++) { editBtns[k].addEventListener('click', function() { openPartylistModal(this.dataset.id, this.dataset.name, this.dataset.desc, this.dataset.badge, this.dataset.badgeText); }); }
                 var delBtns = document.querySelectorAll('#partylistsTableBody .del-btn');
