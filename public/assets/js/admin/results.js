@@ -181,9 +181,9 @@
                 var posCandidates = latestData.positions[j].candidates || [];
                 for (var k = 0; k < posCandidates.length; k++) {
                     var c = posCandidates[k];
-                    var countSpan = document.querySelector('[data-count="' + c.id + '"]');
-                    if (countSpan) {
-                        countSpan.textContent = c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : '');
+                    var countSpans = document.querySelectorAll('[data-count="' + c.id + '"]');
+                    for (var ci = 0; ci < countSpans.length; ci++) {
+                        countSpans[ci].textContent = c.vote_count + ' vote' + (c.vote_count !== 1 ? 's' : '');
                     }
                     // Insert winning badge for desktop cards (inside nameRow) when revealed
                     if (c.is_winning && !resultsHidden) {
