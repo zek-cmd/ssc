@@ -7,6 +7,40 @@
 
     if (!sidebar) return;
 
+    // ---- Chart resize suppression during the width transition ----
+    // The sidebar animates width for 300ms. Charts on the page re-render on every
+    // frame of that slide unless we tell them to hold off. We broadcast start/end
+    // events and let chart owners (results.js) detach/re-attach their observers.
+    var transitionEndTimer = null;
+
+    function emitTransitionStart() {
+        document.dispatchEvent(new CustomEvent('ssc:sidebar-transition-start'));
+    }
+
+    function emitTransitionEnd() {
+        if (transitionEndTimer) {
+            clearTimeout(transitionEndTimer);
+            transitionEndTimer = null;
+        }
+        document.dispatchEvent(new CustomEvent('ssc:sidebar-transition-end'));
+    }
+
+    // Fallback in case transitionend never fires (e.g. transition disabled mid-flight).
+    function scheduleTransitionEnd() {
+        if (transitionEndTimer) clearTimeout(transitionEndTimer);
+        transitionEndTimer = setTimeout(function() {
+            transitionEndTimer = null;
+            emitTransitionEnd();
+        }, 400);
+    }
+
+    sidebar.addEventListener('transitionend', function(e) {
+        // Descendant links also transition width and bubble here; only the sidebar's
+        // own width change marks the end of the slide.
+        if (e.target !== sidebar || e.propertyName !== 'width') return;
+        emitTransitionEnd();
+    });
+
     function setCollapsed(isCollapsed, skipSave) {
         document.documentElement.classList.toggle('sidebar-is-collapsed', isCollapsed);
 
@@ -83,6 +117,8 @@
     if (collapseBtn) {
         collapseBtn.addEventListener('click', function() {
             sidebar.classList.remove('transition-none');
+            emitTransitionStart();
+            scheduleTransitionEnd();
             setCollapsed(true);
         });
     }
@@ -90,6 +126,8 @@
     if (collapseBtnCollapsed) {
         collapseBtnCollapsed.addEventListener('click', function() {
             sidebar.classList.remove('transition-none');
+            emitTransitionStart();
+            scheduleTransitionEnd();
             setCollapsed(false);
         });
     }

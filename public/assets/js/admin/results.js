@@ -125,6 +125,47 @@
         charts = {};
     }
 
+    // ===== SIDEBAR TRANSITION: avoid re-rendering every chart on every frame =====
+    // Chart.js watches each canvas parent with a ResizeObserver. While the sidebar
+    // animates its width, that observer fires ~18 times (300ms / 16.7ms) and each
+    // hit triggers a full chart update (scale rebuild + measureText + canvas repaint).
+    // We detach the responsive watchers for the duration of the slide and re-attach
+    // once at the end, turning N charts x ~18 repaints into N charts x 1.
+    function setChartResponsive(enabled) {
+        for (var key in charts) {
+            if (!Object.prototype.hasOwnProperty.call(charts, key) || !charts[key]) continue;
+            var ch = charts[key];
+            try {
+                ch.options.responsive = enabled;
+                ch.unbindEvents();
+                // bindEvents() re-attaches user events; with responsive === true it also
+                // re-attaches the resize observer and performs a single resize().
+                ch.bindEvents();
+            } catch (e) {}
+            // Chart.js pins the canvas to a px width once attached, so a frozen chart
+            // would leave a gap while the container grows. On suspend we let it stretch
+            // with the container (a cheap composite of the existing bitmap, not a
+            // repaint). On resume we deliberately do NOT touch the width: bindEvents()
+            // above has already resized it back to real pixels at the correct DPR.
+            if (!enabled) {
+                try {
+                    if (ch.canvas) ch.canvas.style.width = '100%';
+                } catch (e) {}
+            }
+        }
+    }
+
+    function suspendChartResize() {
+        setChartResponsive(false);
+    }
+
+    function resumeChartResize() {
+        setChartResponsive(true);
+    }
+
+    document.addEventListener('ssc:sidebar-transition-start', suspendChartResize);
+    document.addEventListener('ssc:sidebar-transition-end', resumeChartResize);
+
     function buildPositionWinning(pos) {
         var cands = pos.candidates || [];
         var winners = [];
