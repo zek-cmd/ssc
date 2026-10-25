@@ -7,6 +7,19 @@ var errorDiv = document.getElementById('loginError');
 var loginButton = document.getElementById('loginButton');
 var isOffline = window.SSC && window.SSC.isOffline === true;
 
+// Clear username/password inputs after a failed sign-in
+function clearCredentials() {
+    var username = document.getElementById('username');
+    var password = document.getElementById('password');
+
+    if (username) username.value = '';
+    if (password) password.value = '';
+
+    if (username) {
+        try { username.focus(); } catch (err) {}
+    }
+}
+
 form.addEventListener('submit', async function(e) {
     e.preventDefault();
 
@@ -61,6 +74,9 @@ form.addEventListener('submit', async function(e) {
                 data.error || 'Unknown error';
             errorDiv.classList.remove('hidden');
         }
+
+        // Clear credentials on failed sign-in
+        clearCredentials();
 
         // Reset Turnstile only when enabled
         if (
