@@ -63,4 +63,6 @@ base64_encode(random_bytes(32))
 
 ## License
 
-Not yet specified. Add a license file if the project will be shared publicly.
+This project is licensed under the [MIT License](LICENSE).
+
+Copyright (c) 2025 SOFTNET Information Technology Center, Inc.
