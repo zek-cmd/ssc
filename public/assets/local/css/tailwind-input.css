@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+/* Scan the project's views and scripts for Tailwind classes */
+@source "../../../../app/Views";
+@source "../../../js";
