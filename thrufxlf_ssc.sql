@@ -53,7 +53,8 @@ CREATE TABLE `candidates` (
   `platform` text COLLATE utf8mb4_general_ci,
   `partylist_id` int DEFAULT NULL,
   `image_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `is_default_winner` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

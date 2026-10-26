@@ -274,6 +274,7 @@ class ApiController extends Controller {
         $platform = trim($_POST['platform'] ?? '');
         $imagePath = $_POST['image_path'] ?? null;
         $removeImage = isset($_POST['remove_image']) && $_POST['remove_image'] === '1';
+        $isDefaultWinner = isset($_POST['is_default_winner']) && $_POST['is_default_winner'] === '1' ? 1 : 0;
         
         if (empty($name) || !$positionId) return $this->json(['success' => false, 'error' => 'Name and position are required'], 422);
         
@@ -291,7 +292,7 @@ class ApiController extends Controller {
             $partylistName = $partylistData['name'] ?? '-';
         }
         
-        $data = ['name' => $name, 'position_id' => $positionId, 'partylist_id' => $partylistId, 'platform' => $platform];
+        $data = ['name' => $name, 'position_id' => $positionId, 'partylist_id' => $partylistId, 'platform' => $platform, 'is_default_winner' => $isDefaultWinner];
         
         if ($id && $removeImage) {
             $existing = $model->find($id);

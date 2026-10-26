@@ -592,7 +592,7 @@ if (candidateSearch) {
         });
     }
 
-    function openCandidateModal(id, name, posId, plId, platform, imagePath) {
+    function openCandidateModal(id, name, posId, plId, platform, imagePath, isDefaultWinner) {
         if (!isSuperAdmin) return;
         document.getElementById('candidateModal').classList.remove('hidden');
         var scrollContainer = document.querySelector('#candidateModal .overflow-y-auto');
@@ -614,6 +614,7 @@ if (candidateSearch) {
             document.getElementById('candId').value = id;
             document.getElementById('candName').value = name || '';
             document.getElementById('candPlatform').value = platform || '';
+            document.getElementById('candDefaultWinner').checked = (isDefaultWinner === 1 || isDefaultWinner === '1');
             if (imagePath && preview && previewContainer) {
                 preview.src = window.SSC.candidateImagesUrl + '/' + imagePath;
                 previewContainer.classList.remove('hidden');
@@ -623,6 +624,7 @@ if (candidateSearch) {
             document.getElementById('candId').value = '';
             document.getElementById('candName').value = '';
             document.getElementById('candPlatform').value = '';
+            document.getElementById('candDefaultWinner').checked = false;
         }
     }
 
@@ -640,15 +642,15 @@ if (candidateSearch) {
                     h += '<tr class="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 row-fixed">';
                     if (isSuperAdmin) h += '<td class="cell-desktop px-4 py-3"><input type="checkbox" value="' + c.id + '" ' + ch + ' class="cand-cb rounded"></td>';
                     h += '<td class="cell-desktop px-4 py-3"><img src="' + (c.image_path ? window.SSC.candidateImagesUrl + '/' + c.image_path : '') + '" class="candidate-thumb w-10 h-10 rounded-full object-cover ring-1 ring-zinc-200/60 dark:ring-zinc-700/60"></td>';
-                    h += '<td class="cell-desktop px-4 py-3 font-semibold text-zinc-900 dark:text-white"><span class="block truncate">' + c.name + '</span></td>';
+                    h += '<td class="cell-desktop px-4 py-3 font-semibold text-zinc-900 dark:text-white"><div class="flex items-center gap-2 min-w-0"><span class="truncate">' + c.name + '</span>' + (c.is_default_winner ? '<span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300">Winner</span>' : '') + '</div></td>';
                     h += '<td class="cell-desktop px-4 py-3 text-zinc-600 dark:text-zinc-400"><span class="block truncate">' + (c.position_name || '-') + '</span></td>';
                     h += '<td class="cell-desktop px-4 py-3 text-zinc-600 dark:text-zinc-400"><span class="block truncate">' + (c.partylist_name || '-') + '</span></td>';
-                    if (isSuperAdmin) h += '<td class="cell-desktop px-4 py-3"><div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + c.id + '" data-name="' + (c.name||'').replace(/"/g,'&quot;') + '" data-pos="' + c.position_id + '" data-pl="' + (c.partylist_id||'') + '" data-platform="' + (c.platform||'').replace(/"/g,'&quot;') + '" data-image="' + (c.image_path||'') + '">Edit</button><button class="del-btn text-red-500 hover:text-red-400 text-sm font-semibold" data-id="' + c.id + '">Delete</button></div></td>';
+                    if (isSuperAdmin) h += '<td class="cell-desktop px-4 py-3"><div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + c.id + '" data-name="' + (c.name||'').replace(/"/g,'&quot;') + '" data-pos="' + c.position_id + '" data-pl="' + (c.partylist_id||'') + '" data-platform="' + (c.platform||'').replace(/"/g,'&quot;') + '" data-image="' + (c.image_path||'') + '" data-default-winner="' + (c.is_default_winner||0) + '">Edit</button><button class="del-btn text-red-500 hover:text-red-400 text-sm font-semibold" data-id="' + c.id + '">Delete</button></div></td>';
                     h += '<td class="cell-mobile px-4 py-3" colspan="' + colspan + '"><div class="space-y-2 mobile-card-fixed">';
                     h += '<div class="flex items-center justify-between"><div class="flex items-center gap-2 min-w-0">';
                     if (isSuperAdmin) h += '<input type="checkbox" value="' + c.id + '" ' + ch + ' class="cand-cb rounded shrink-0"><span class="drag-handle cursor-grab text-zinc-400 shrink-0 opacity-0 select-none w-4 h-4 inline-block"></span>';
-                    h += '<img src="' + (c.image_path ? window.SSC.candidateImagesUrl + '/' + c.image_path : '') + '" class="candidate-thumb w-8 h-8 rounded-full object-cover shrink-0"><span class="font-semibold text-zinc-900 dark:text-white truncate">' + c.name + '</span></div>';
-                    if (isSuperAdmin) h += '<div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + c.id + '" data-name="' + (c.name||'').replace(/"/g,'&quot;') + '" data-pos="' + c.position_id + '" data-pl="' + (c.partylist_id||'') + '" data-platform="' + (c.platform||'').replace(/"/g,'&quot;') + '" data-image="' + (c.image_path||'') + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button><button class="del-btn text-red-500 hover:text-red-400 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + c.id + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></div>';
+                    h += '<img src="' + (c.image_path ? window.SSC.candidateImagesUrl + '/' + c.image_path : '') + '" class="candidate-thumb w-8 h-8 rounded-full object-cover shrink-0"><span class="font-semibold text-zinc-900 dark:text-white truncate min-w-0">' + c.name + '</span>' + (c.is_default_winner ? '<span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300">Winner</span>' : '') + '</div>';
+                    if (isSuperAdmin) h += '<div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + c.id + '" data-name="' + (c.name||'').replace(/"/g,'&quot;') + '" data-pos="' + c.position_id + '" data-pl="' + (c.partylist_id||'') + '" data-platform="' + (c.platform||'').replace(/"/g,'&quot;') + '" data-image="' + (c.image_path||'') + '" data-default-winner="' + (c.is_default_winner||0) + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button><button class="del-btn text-red-500 hover:text-red-400 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + c.id + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></div>';
                      h += '<div class="flex flex-col gap-1 text-xs min-w-0"><span class="text-zinc-500 truncate">' + (c.position_name || '-') + '</span>' + (c.partylist_name ? '<span data-partylist-badge="' + c.partylist_name + '" data-pl-color="' + (c.partylist_badge_color || '#1e40af') + '" data-pl-text="' + (c.partylist_badge_text_color || '#ffffff') + '" class="text-xs truncate inline-block self-start px-1.5 py-0.5 rounded pl-badge border border-zinc-300 dark:border-zinc-600">' + c.partylist_name + '</span>' : '') + '</div>';
                     h += '</div></td></tr>';
 
@@ -665,7 +667,7 @@ if (candidateSearch) {
                 var saCand = document.querySelector('.select-all-candidates');
                 if (saCand) saCand.checked = false;
                 var editBtns = document.querySelectorAll('#candidatesTableBody .edit-btn');
-                for (var k = 0; k < editBtns.length; k++) { editBtns[k].addEventListener('click', function() { openCandidateModal(this.dataset.id, this.dataset.name, this.dataset.pos, this.dataset.pl, this.dataset.platform, this.dataset.image); }); }
+                for (var k = 0; k < editBtns.length; k++) { editBtns[k].addEventListener('click', function() { openCandidateModal(this.dataset.id, this.dataset.name, this.dataset.pos, this.dataset.pl, this.dataset.platform, this.dataset.image, this.dataset.defaultWinner); }); }
                 var delBtns = document.querySelectorAll('#candidatesTableBody .del-btn');
                 for (var l = 0; l < delBtns.length; l++) {
                     delBtns[l].addEventListener('click', async function() {

@@ -169,11 +169,29 @@
                 card.setAttribute('data-partylist-badge-text-color', candidate.badge_text_color || '#ffffff');
                 card.setAttribute('data-image-path', candidate.image_path || '');
                 
+                if (!selections[position.id] && candidate.is_default_winner == 1) {
+                    selections[position.id] = {
+                        candidate_id: String(candidate.id),
+                        candidate_name: candidate.name,
+                        partylist_name: candidate.partylist_name || '',
+                        partylist_badge_color: candidate.badge_color || '#1e40af',
+                        partylist_badge_text_color: candidate.badge_text_color || '#ffffff',
+                        image_path: candidate.image_path || ''
+                    };
+                }
+                var positionHasDefault = position.candidates.some(function(c) { return c.is_default_winner == 1; });
+                if (positionHasDefault) {
+                    card.setAttribute('data-locked', 'true');
+                    card.disabled = true;
+                    card.classList.add('cursor-not-allowed', 'opacity-60');
+                    card.classList.remove('cursor-pointer', 'hover:bg-zinc-50', 'dark:hover:bg-zinc-800/50');
+                }
                 if (selections[position.id] && selections[position.id].candidate_id === String(candidate.id)) {
                     card.classList.add('ring-4', 'ring-blue-500', 'bg-blue-50/50', 'dark:bg-blue-950/30');
                 }
                 
                 card.addEventListener('click', function() {
+                    if (positionHasDefault) return;
                     selections[position.id] = {
                         candidate_id: String(candidate.id),
                         candidate_name: candidate.name,
@@ -193,7 +211,7 @@
                 });
                 
                 var imgWrap = document.createElement('div');
-                imgWrap.className = 'w-40 h-40 sm:w-56 sm:h-56 lg:w-72 lg:h-72 bg-zinc-100 dark:bg-zinc-800 rounded-3xl overflow-hidden mb-4 ring-1 ring-zinc-200/60 dark:ring-zinc-700/60';
+                imgWrap.className = 'relative z-10 w-40 h-40 sm:w-56 sm:h-56 lg:w-72 lg:h-72 bg-zinc-100 dark:bg-zinc-800 rounded-3xl overflow-hidden mb-4 ring-1 ring-zinc-200/60 dark:ring-zinc-700/60';
                 
                 if (candidate.image_path) {
                     var img = document.createElement('img');
@@ -215,15 +233,23 @@
                     imgWrap.appendChild(svg);
                 }
                 card.appendChild(imgWrap);
+
+                if (candidate.is_default_winner == 1) {
+                    var winnerBadge = document.createElement('span');
+                    winnerBadge.className = 'pointer-events-none absolute top-2 left-0 right-0 z-20 mx-auto w-max px-5 py-1.5 rounded-md bg-amber-400 text-amber-950 text-sm sm:text-base font-black uppercase tracking-widest shadow-lg select-none';
+                    winnerBadge.setAttribute('aria-hidden', 'true');
+                    winnerBadge.textContent = 'WINNER';
+                    card.appendChild(winnerBadge);
+                }
                 
                 var nameSpan = document.createElement('span');
-                nameSpan.className = 'font-bold text-zinc-900 dark:text-white text-base sm:text-lg lg:text-xl';
+                nameSpan.className = 'relative z-10 font-bold text-zinc-900 dark:text-white text-base sm:text-lg lg:text-xl';
                 nameSpan.textContent = candidate.name;
                 card.appendChild(nameSpan);
                 
                 if (candidate.partylist_name) {
                     var badge = document.createElement('span');
-                    badge.className = 'badge-blue text-[11px] sm:text-xs mt-2 px-3 py-1';
+                    badge.className = 'relative z-10 badge-blue text-[11px] sm:text-xs mt-2 px-3 py-1';
                     badge.style.backgroundColor = candidate.badge_color || '#1e40af';
                     badge.style.color = candidate.badge_text_color || '#ffffff';
                     badge.style.border = '1px solid #ccc';

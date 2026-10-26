@@ -51,7 +51,7 @@ class ResultsController extends Controller {
         $stmt = $pdo->query("
             SELECT 
                 p.id as position_id, p.name as position_name, p.sort_order,
-                c.id as candidate_id, c.name as candidate_name, c.image_path,
+                c.id as candidate_id, c.name as candidate_name, c.image_path, c.is_default_winner,
                 pl.name as partylist_name, pl.badge_color as partylist_badge_color, pl.badge_text_color as partylist_badge_text_color, pl.sort_order as partylist_sort_order,
                 COALESCE(vc.vote_count, 0) as vote_count
             FROM positions p
@@ -82,7 +82,8 @@ class ResultsController extends Controller {
                     'partylist_name' => $row['partylist_name'],
                     'partylist_badge_color' => $row['partylist_badge_color'] ?? '#1e40af',
                     'partylist_badge_text_color' => $row['partylist_badge_text_color'] ?? '#ffffff',
-                    'vote_count' => (int)$row['vote_count']
+                    'vote_count' => (int)$row['vote_count'],
+                    'is_default_winner' => (int)($row['is_default_winner'] ?? 0)
                 ];
             }
         }
@@ -97,8 +98,14 @@ class ResultsController extends Controller {
             foreach ($pos['candidates'] as $c) {
                 if ($c['vote_count'] === $maxVotes) $maxCount++;
             }
-            $positions[$pid]['candidates'] = array_map(function($c) use ($maxVotes, $maxCount) {
-                $c['is_winning'] = ($maxVotes > 0 && $c['vote_count'] === $maxVotes && $maxCount === 1);
+            // A default winner always wins its position, even when others have votes
+            $defaultWinners = array_filter($pos['candidates'], function($c) { return $c['is_default_winner'] === 1; });
+            $positions[$pid]['candidates'] = array_map(function($c) use ($maxVotes, $maxCount, $defaultWinners) {
+                if (!empty($defaultWinners)) {
+                    $c['is_winning'] = $c['is_default_winner'] === 1;
+                } else {
+                    $c['is_winning'] = ($maxVotes > 0 && $c['vote_count'] === $maxVotes && $maxCount === 1);
+                }
                 return $c;
             }, $pos['candidates']);
         }

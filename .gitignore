@@ -2,6 +2,7 @@
 .env
 .env.local
 .env.production
+.hormachuelos
 
 # Storage
 storage/logs/*
@@ -23,3 +24,4 @@ Thumbs.db
 
 bak/
 bin/
+candidate_images/

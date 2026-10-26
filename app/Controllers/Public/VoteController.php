@@ -78,7 +78,7 @@ class VoteController extends Controller {
         $result = [];
         foreach ($positions as $position) {
             $stmt = $pdo->prepare("
-                SELECT c.id, c.name, c.platform, c.image_path, pl.name as partylist_name, pl.badge_color, pl.badge_text_color
+                SELECT c.id, c.name, c.platform, c.image_path, c.is_default_winner, pl.name as partylist_name, pl.badge_color, pl.badge_text_color
                 FROM candidates c
                 LEFT JOIN partylists pl ON c.partylist_id = pl.id
                 WHERE c.position_id = ?
