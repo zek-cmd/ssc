@@ -159,12 +159,12 @@
             return;
         } else if (roleField && roleField.value === 'admin') {
             if (modifyOwnContainer) modifyOwnContainer.classList.add('hidden');
-            if (modifyOwnField) { modifyOwnField.checked = true; modifyOwnField.disabled = false; }
+            if (modifyOwnField) modifyOwnField.disabled = true;
             return;
         }
         var show = !!(manageField && manageField.checked);
         if (modifyOwnContainer) modifyOwnContainer.classList.toggle('hidden', !show);
-        if (modifyOwnField) modifyOwnField.disabled = false;
+        if (modifyOwnField) modifyOwnField.disabled = true;
     }
 
     userSearch = document.getElementById('userSearch');
@@ -302,6 +302,8 @@
         var manageSessionsField = document.getElementById('userManageSessions');
         var modifyOwnField = document.getElementById('userModifyOwnPassword');
         var modifyOwnContainer = document.getElementById('modifyOwnPasswordContainer');
+        // Reset every shared checkbox so the previous user's state never carries over
+        [auditField, manageField, deleteElectionField, exportCsvField, editInfoField, manageVoteField, manageSessionsField, enabledField, modifyOwnField].forEach(function(el) { if (el) { el.checked = false; el.disabled = false; } });
         if (window.SSC && window.SSC.canModifyOwnPasswordOnly) {
             passwordField.required = true; passwordField.placeholder = 'Enter new password'; passwordHint.textContent = 'Enter new password';
         }
@@ -336,6 +338,7 @@
             document.getElementById('exportCsvContainer').classList.add('hidden');
             document.getElementById('editInfoContainer').classList.add('hidden');
             document.getElementById('manageVoteContainer').classList.add('hidden');
+            document.getElementById('manageSessionsContainer').classList.add('hidden');
             document.getElementById('enabledHintContainer').classList.add('hidden');
             document.getElementById('modifyOwnPasswordContainer').classList.add('hidden');
             document.getElementById('userModalTitle').textContent = 'Update Password';
@@ -350,6 +353,7 @@
             document.getElementById('exportCsvContainer').classList.remove('hidden');
             document.getElementById('editInfoContainer').classList.remove('hidden');
             document.getElementById('manageVoteContainer').classList.remove('hidden');
+            document.getElementById('manageSessionsContainer').classList.remove('hidden');
             document.getElementById('enabledHintContainer').classList.remove('hidden');
             document.getElementById('userUsername').required = true;
             document.getElementById('userName').required = true;
