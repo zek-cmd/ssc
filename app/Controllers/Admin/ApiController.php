@@ -818,12 +818,33 @@ class ApiController extends Controller {
         }
         $pdo = \App\Core\Model::db();
         $cutoff = time() - (int)SESSION_LIFETIME;
+        $perPage = 10;
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $search = trim((string)($_GET['search'] ?? ''));
+
+        $where = "s.user_type = 'voter' AND s.last_activity >= ?";
+        $params = [$cutoff];
+        if ($search !== '') {
+            // Match on voter name, IP address or user-agent text (host names are looked up after the query)
+            $where .= " AND (u.username LIKE ? OR s.ip LIKE ? OR s.user_agent LIKE ?)";
+            $like = '%' . $search . '%';
+            array_push($params, $like, $like, $like);
+        }
+
+        $countStmt = $pdo->prepare("SELECT COUNT(*) FROM sessions s LEFT JOIN users u ON u.id = s.user_id WHERE $where");
+        $countStmt->execute($params);
+        $total = (int)$countStmt->fetchColumn();
+        $pages = max(1, (int)ceil($total / $perPage));
+        $page = min($page, $pages);
+        $offset = ($page - 1) * $perPage;
+
         $stmt = $pdo->prepare("SELECT s.id, s.user_id, s.ip, s.user_agent, s.last_activity, u.username
             FROM sessions s
             LEFT JOIN users u ON u.id = s.user_id
-            WHERE s.user_type = 'voter' AND s.last_activity >= ?
-            ORDER BY s.last_activity DESC");
-        $stmt->execute([$cutoff]);
+            WHERE $where
+            ORDER BY s.last_activity DESC
+            LIMIT $perPage OFFSET $offset");
+        $stmt->execute($params);
         $rows = $stmt->fetchAll();
         $sessions = [];
         foreach ($rows as $row) {
@@ -841,7 +862,13 @@ class ApiController extends Controller {
                 'last_activity' => date('Y-m-d H:i:s', (int)$row['last_activity']),
             ];
         }
-        return $this->json(['success' => true, 'sessions' => $sessions]);
+        return $this->json([
+            'success' => true,
+            'sessions' => $sessions,
+            'total' => $total,
+            'page' => $page,
+            'pages' => $pages,
+        ]);
     }
 
     // Revoke one voter session: deleting its row logs that voter out on their next request
