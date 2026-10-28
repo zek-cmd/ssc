@@ -96,6 +96,58 @@
         });
     }
 
+    // Hamburger menu (mobile): open/close, same behaviour as the dashboard
+    var mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    var mobileMenu = document.getElementById('mobileMenu');
+    var menuIconOpen = document.getElementById('menuIconOpen');
+    var menuIconClose = document.getElementById('menuIconClose');
+
+    function updateMenuIcon() {
+        if (mobileMenu.classList.contains('hidden')) {
+            menuIconOpen.classList.remove('hidden');
+            menuIconClose.classList.add('hidden');
+        } else {
+            menuIconOpen.classList.add('hidden');
+            menuIconClose.classList.remove('hidden');
+        }
+    }
+
+    function openMobileMenu() {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.offsetHeight;
+        mobileMenu.classList.remove('max-h-0', 'opacity-0');
+        mobileMenu.classList.add('max-h-[calc(100dvh-8rem)]', 'opacity-100');
+        updateMenuIcon();
+    }
+
+    function closeMobileMenu() {
+        mobileMenu.classList.remove('max-h-[calc(100dvh-8rem)]', 'opacity-100');
+        mobileMenu.classList.add('max-h-0', 'opacity-0');
+        setTimeout(function () {
+            mobileMenu.classList.add('hidden');
+            updateMenuIcon();
+        }, 300);
+    }
+
+    if (mobileMenuBtn && mobileMenu) {
+        mobileMenuBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (mobileMenu.classList.contains('hidden')) {
+                openMobileMenu();
+            } else {
+                closeMobileMenu();
+            }
+        });
+        mobileMenu.querySelectorAll('a, button').forEach(function (el) {
+            el.addEventListener('click', function () { closeMobileMenu(); });
+        });
+        document.addEventListener('click', function (e) {
+            if (!mobileMenu.classList.contains('hidden') && !mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                closeMobileMenu();
+            }
+        });
+    }
+
     if (refreshBtn) refreshBtn.addEventListener('click', load);
     load();
 })();
