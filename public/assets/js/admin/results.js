@@ -747,7 +747,7 @@
                     }
                     row.setAttribute('data-candidate', c.id);
 
-                    var imgWrap = el('div', 'w-full aspect-[3/4] max-h-80 bg-zinc-100 dark:bg-zinc-800 rounded-3xl overflow-hidden flex items-center justify-center');
+                    var imgWrap = el('div', 'w-full aspect-[3/4] max-h-80 overflow-hidden flex items-center justify-center');
                     if (c.image_path) {
                         imgWrap.appendChild(el('img', 'block w-full h-full object-contain', { src: candidateImagesUrl + '/' + c.image_path, alt: c.name }));
                     } else {
