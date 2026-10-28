@@ -51,7 +51,7 @@ class AuthService {
     public function authenticateAdmin($username, $password) {
         try {
             $stmt = $this->pdo->prepare(
-                "SELECT id, username, password, role, name, can_manage_audit_logs, can_manage_accounts, can_delete_election, can_export_csv, can_edit_info, can_manage_vote, enabled 
+                "SELECT id, username, password, role, name, can_manage_audit_logs, can_manage_accounts, can_delete_election, can_export_csv, can_edit_info, can_manage_vote, can_modify_own_password_only, can_manage_sessions, enabled 
                 FROM users WHERE username = ? AND role IN ('admin', 'superadmin') LIMIT 1"
             );
             $stmt->execute([$username]);
@@ -80,7 +80,9 @@ class AuthService {
                 $user['can_delete_election'] ?? 0,
                 $user['can_export_csv'] ?? 0,
                 $user['can_edit_info'] ?? 0,
-                $user['can_manage_vote'] ?? 0
+                $user['can_manage_vote'] ?? 0,
+                $user['can_modify_own_password_only'] ?? 0,
+                $user['can_manage_sessions'] ?? 0
             );
             SessionService::generateCSRFToken();
             

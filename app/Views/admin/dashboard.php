@@ -17,6 +17,10 @@ if (isset($canManageAuditLogs) && $canManageAuditLogs) {
     $sidebarNavItems[] = ['url' => APP_URL . '/admin/security-events', 'label' => 'Security Events', 'icon' => 'security'];
 }
 
+if (isset($canManageSessions) && $canManageSessions) {
+    $sidebarNavItems[] = ['url' => APP_URL . '/admin/sessions', 'label' => 'Sessions', 'icon' => 'security'];
+}
+
 if (isset($canManageVote) && $canManageVote) {
     $extraSidebarNavHtml = '
     <button type="button" id="votingControlsBtn" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-2xl text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-300 sidebar-expanded-item">

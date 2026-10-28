@@ -783,6 +783,93 @@ class ApiController extends Controller {
         ]);
     }
 
+    private function canManageVoteSessions() {
+        $adminData = SessionService::getAdminData();
+        $adminId = isset($adminData['user_id']) ? (int)$adminData['user_id'] : 0;
+        if (!$adminId) return false;
+        $stmt = \App\Core\Model::db()->prepare("SELECT can_manage_vote FROM users WHERE id = ? LIMIT 1");
+        $stmt->execute([$adminId]);
+        $row = $stmt->fetch();
+        return $row && $row['can_manage_vote'] == 1;
+    }
+
+    // Simple device label from the user-agent string
+    private function detectDevice($ua) {
+        if (stripos($ua, 'iPad') !== false || stripos($ua, 'Tablet') !== false) return 'Tablet';
+        if (stripos($ua, 'iPhone') !== false || stripos($ua, 'Android') !== false || stripos($ua, 'Mobile') !== false) return 'Mobile';
+        if ($ua === '') return 'Unknown';
+        return 'Desktop';
+    }
+
+    // Simple browser label from the user-agent string (order matters: Edge/Opera contain "Chrome")
+    private function detectBrowser($ua) {
+        if (stripos($ua, 'Edg') !== false) return 'Edge';
+        if (stripos($ua, 'OPR') !== false || stripos($ua, 'Opera') !== false) return 'Opera';
+        if (stripos($ua, 'Firefox') !== false) return 'Firefox';
+        if (stripos($ua, 'Chrome') !== false) return 'Chrome';
+        if (stripos($ua, 'Safari') !== false) return 'Safari';
+        return $ua === '' ? 'Unknown' : 'Other';
+    }
+
+    // List voter sessions stored in the database (active = used within session lifetime)
+    public function getSessions() {
+        if (!$this->canManageVoteSessions()) {
+            return $this->json(['success' => false, 'error' => 'Access denied'], 403);
+        }
+        $pdo = \App\Core\Model::db();
+        $cutoff = time() - (int)SESSION_LIFETIME;
+        $stmt = $pdo->prepare("SELECT s.id, s.user_id, s.ip, s.user_agent, s.last_activity, u.username
+            FROM sessions s
+            LEFT JOIN users u ON u.id = s.user_id
+            WHERE s.user_type = 'voter' AND s.last_activity >= ?
+            ORDER BY s.last_activity DESC");
+        $stmt->execute([$cutoff]);
+        $rows = $stmt->fetchAll();
+        $sessions = [];
+        foreach ($rows as $row) {
+            $ua = (string)($row['user_agent'] ?? '');
+            $ip = (string)($row['ip'] ?? '');
+            $sessions[] = [
+                // Public reference only: a hash of the session ID, never the ID itself
+                'ref' => hash('sha256', $row['id']),
+                'username' => $row['username'] ?? 'Voter',
+                'ip' => $ip,
+                'host' => ($ip !== '' ? (gethostbyaddr($ip) ?: 'Unknown') : 'Unknown'),
+                'device' => $this->detectDevice($ua),
+                'browser' => $this->detectBrowser($ua),
+                'user_agent' => $ua,
+                'last_activity' => date('Y-m-d H:i:s', (int)$row['last_activity']),
+            ];
+        }
+        return $this->json(['success' => true, 'sessions' => $sessions]);
+    }
+
+    // Revoke one voter session: deleting its row logs that voter out on their next request
+    public function revokeSession() {
+        if (!$this->canManageVoteSessions()) {
+            return $this->json(['success' => false, 'error' => 'Access denied'], 403);
+        }
+        $ref = (string)$this->getInput('ref', '');
+        if (!preg_match('/^[a-f0-9]{64}$/', $ref)) {
+            return $this->json(['success' => false, 'error' => 'Invalid session'], 400);
+        }
+        $pdo = \App\Core\Model::db();
+        // Find the row whose hashed ID matches the reference; never revoke the admin's own session
+        $stmt = $pdo->prepare("SELECT s.id, s.user_id, u.username FROM sessions s LEFT JOIN users u ON u.id = s.user_id WHERE SHA2(s.id, 256) = ? AND s.user_type = 'voter' LIMIT 1");
+        $stmt->execute([$ref]);
+        $row = $stmt->fetch();
+        if (!$row) {
+            return $this->json(['success' => false, 'error' => 'Session not found'], 404);
+        }
+        if ($row['id'] === session_id()) {
+            return $this->json(['success' => false, 'error' => 'Cannot revoke your own session'], 400);
+        }
+        $pdo->prepare("DELETE FROM sessions WHERE id = ?")->execute([$row['id']]);
+        $who = $row['username'] ?? 'voter';
+        $this->audit('sessions', 'DELETE', (int)$row['user_id'], null, null, "Revoked voter session for {$who}");
+        return $this->json(['success' => true, 'message' => "Logged out {$who}"]);
+    }
+
     public function getToggleStates() {
         $pdo = \App\Core\Model::db();
         $stmt = $pdo->query("SELECT enable_vote, enable_login, enable_guest, enable_test_vote FROM votingswitch LIMIT 1");

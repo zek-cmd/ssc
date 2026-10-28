@@ -257,6 +257,12 @@ return [
         'middleware' => ['Admin\AuthMiddleware']
     ],
 
+    // Voter Sessions (separate page)
+    'GET /admin/sessions' => [
+        'handler' => ['Admin\\SessionsController', 'index'],
+        'middleware' => ['Admin\\AuthMiddleware']
+    ],
+
     // Vote Toggle
     'GET /admin/api/vote-toggle' => [
         'handler' => ['Admin\ApiController', 'getVoteToggle'],
@@ -282,6 +288,16 @@ return [
     ],
     'POST /admin/api/toggle-state' => [
         'handler' => ['Admin\ApiController', 'toggleState'],
+        'middleware' => ['Admin\AuthMiddleware', 'CsrfMiddleware']
+    ],
+
+    // Voter sessions (list and revoke / log out voters)
+    'GET /admin/api/sessions' => [
+        'handler' => ['Admin\ApiController', 'getSessions'],
+        'middleware' => ['Admin\AuthMiddleware']
+    ],
+    'POST /admin/api/sessions/revoke' => [
+        'handler' => ['Admin\ApiController', 'revokeSession'],
         'middleware' => ['Admin\AuthMiddleware', 'CsrfMiddleware']
     ],
 

@@ -85,12 +85,14 @@
         var exportCsvContainer = document.getElementById('exportCsvContainer');
         var editInfoContainer = document.getElementById('editInfoContainer');
         var manageVoteContainer = document.getElementById('manageVoteContainer');
+        var manageSessionsContainer = document.getElementById('manageSessionsContainer');
         var auditField = document.getElementById('userAuditLogs');
         var manageField = document.getElementById('userManageAccounts');
         var deleteElectionField = document.getElementById('userDeleteElection');
         var exportCsvField = document.getElementById('userExportCsv');
         var editInfoField = document.getElementById('userEditInfo');
         var manageVoteField = document.getElementById('userManageVote');
+        var manageSessionsField = document.getElementById('userManageSessions');
         
         if (role === 'superadmin') {
             if (auditContainer) auditContainer.style.display = '';
@@ -99,12 +101,14 @@
             if (exportCsvContainer) exportCsvContainer.style.display = '';
             if (editInfoContainer) editInfoContainer.style.display = '';
             if (manageVoteContainer) manageVoteContainer.style.display = '';
+            if (manageSessionsContainer) manageSessionsContainer.style.display = '';
             if (auditField) auditField.disabled = false;
             if (manageField) manageField.disabled = false;
             if (deleteElectionField) deleteElectionField.disabled = false;
             if (exportCsvField) exportCsvField.disabled = false;
             if (editInfoField) editInfoField.disabled = false;
             if (manageVoteField) manageVoteField.disabled = false;
+            if (manageSessionsField) manageSessionsField.disabled = false;
         } else {
             if (auditContainer) auditContainer.style.display = 'none';
             if (manageContainer) manageContainer.style.display = 'none';
@@ -112,6 +116,7 @@
             if (exportCsvContainer) exportCsvContainer.style.display = 'none';
             if (editInfoContainer) editInfoContainer.style.display = 'none';
             if (manageVoteContainer) manageVoteContainer.style.display = 'none';
+            if (manageSessionsContainer) manageSessionsContainer.style.display = 'none';
             if (auditField) {
                 auditField.checked = false;
                 auditField.disabled = true;
@@ -135,6 +140,10 @@
             if (manageVoteField) {
                 manageVoteField.checked = false;
                 manageVoteField.disabled = true;
+            }
+            if (manageSessionsField) {
+                manageSessionsField.checked = false;
+                manageSessionsField.disabled = true;
             }
         }
     }
@@ -231,6 +240,10 @@
         var wasDisabled = usernameField.disabled;
         if (wasDisabled) usernameField.disabled = false;
         var data = {}; new FormData(this).forEach(function(v,k) { data[k] = v; });
+        // Disabled checkboxes are not sent with the form, so send the sessions flag explicitly
+        var sessionsBox = document.getElementById('userManageSessions');
+        if (sessionsBox && !sessionsBox.disabled && sessionsBox.checked) data['can_manage_sessions'] = '1';
+        else delete data['can_manage_sessions'];
         if (wasDisabled) usernameField.disabled = true;
         apiPost(appUrl + '/admin/api/users', data, function(d) { if (d.success) { document.getElementById('userModal').classList.add('hidden'); loadUsers(); showToast(d.message); } else Swal.fire({ text: d.error, icon: 'error' }); });
     });
@@ -279,13 +292,14 @@
         cf.addEventListener('input', validate);
     })();
 
-    function openUserModal(id, username, name, role, canManageAudit, canManageAccounts, canDeleteElection, canExportCsv, canEditInfo, canManageVote, enabled, canModifyOwnPassword) {
+    function openUserModal(id, username, name, role, canManageAudit, canManageAccounts, canDeleteElection, canExportCsv, canEditInfo, canManageVote, enabled, canModifyOwnPassword, canManageSessions) {
         document.getElementById('userModal').classList.remove('hidden');
         var scrollContainer = document.querySelector('#userModal .overflow-y-auto');
         if (scrollContainer) scrollContainer.scrollTop = 0;
         var passwordField = document.getElementById('userPassword'), usernameField = document.getElementById('userUsername');
         var roleField = document.getElementById('userRole'), auditField = document.getElementById('userAuditLogs'), manageField = document.getElementById('userManageAccounts'), deleteElectionField = document.getElementById('userDeleteElection'), exportCsvField = document.getElementById('userExportCsv'), editInfoField = document.getElementById('userEditInfo'), manageVoteField = document.getElementById('userManageVote'), passwordHint = document.getElementById('passwordHint');
         var enabledField = document.getElementById('userEnabled');
+        var manageSessionsField = document.getElementById('userManageSessions');
         var modifyOwnField = document.getElementById('userModifyOwnPassword');
         var modifyOwnContainer = document.getElementById('modifyOwnPasswordContainer');
         if (window.SSC && window.SSC.canModifyOwnPasswordOnly) {
@@ -296,14 +310,14 @@
             usernameField.value = username || ''; usernameField.disabled = true;
             document.getElementById('userName').value = name || '';
             passwordField.required = false; passwordField.placeholder = 'Leave blank to keep current'; passwordHint.textContent = 'Leave blank to keep current password';
-            roleField.value = role || 'admin'; auditField.checked = canManageAudit == 1; manageField.checked = canManageAccounts == 1; deleteElectionField.checked = canDeleteElection == 1; exportCsvField.checked = canExportCsv == 1; editInfoField.checked = canEditInfo == 1; manageVoteField.checked = canManageVote == 1; enabledField.checked = enabled == 1; modifyOwnField.checked = canModifyOwnPassword == 1; syncModifyOwnVisibility();
+            roleField.value = role || 'admin'; auditField.checked = canManageAudit == 1; manageField.checked = canManageAccounts == 1; deleteElectionField.checked = canDeleteElection == 1; exportCsvField.checked = canExportCsv == 1; editInfoField.checked = canEditInfo == 1; manageVoteField.checked = canManageVote == 1; manageSessionsField.checked = canManageSessions == 1; enabledField.checked = enabled == 1; modifyOwnField.checked = canModifyOwnPassword == 1; syncModifyOwnVisibility();
             if (username === window.SSC.adminUsername) { roleField.disabled = true; auditField.disabled = true; manageField.disabled = true; deleteElectionField.disabled = true; exportCsvField.disabled = true; enabledField.disabled = true; modifyOwnField.disabled = true; modifyOwnField.checked = false; } else { roleField.disabled = false; auditField.disabled = false; manageField.disabled = false; deleteElectionField.disabled = false; exportCsvField.disabled = false; enabledField.disabled = false; }
             togglePermissionCheckboxes(roleField.value);
         } else {
             document.getElementById('userModalTitle').textContent = 'Add User'; document.getElementById('userId').value = '';
             usernameField.value = ''; usernameField.disabled = false; document.getElementById('userName').value = '';
             passwordField.required = true; passwordField.placeholder = 'Enter password'; passwordHint.textContent = 'Minimum 6 characters recommended';
-            roleField.value = 'admin'; roleField.disabled = false; auditField.checked = false; auditField.disabled = false; manageField.checked = false; manageField.disabled = false; deleteElectionField.checked = false; deleteElectionField.disabled = false; exportCsvField.checked = false; exportCsvField.disabled = false; editInfoField.checked = false; editInfoField.disabled = false; manageVoteField.checked = false; manageVoteField.disabled = false; enabledField.checked = true; enabledField.disabled = false; modifyOwnField.checked = true; syncModifyOwnVisibility();
+            roleField.value = 'admin'; roleField.disabled = false; auditField.checked = false; auditField.disabled = false; manageField.checked = false; manageField.disabled = false; deleteElectionField.checked = false; deleteElectionField.disabled = false; exportCsvField.checked = false; exportCsvField.disabled = false; editInfoField.checked = false; editInfoField.disabled = false; manageVoteField.checked = false; manageVoteField.disabled = false; manageSessionsField.checked = false; manageSessionsField.disabled = false; enabledField.checked = true; enabledField.disabled = false; modifyOwnField.checked = true; syncModifyOwnVisibility();
             togglePermissionCheckboxes(roleField.value);
         }
         if (window.SSC && window.SSC.canModifyOwnPasswordOnly) {
@@ -362,13 +376,13 @@
                     h += '<td class="cell-desktop px-4 py-3"><span class="badge-blue">' + u.role + '</span></td>';
                     h += '<td class="cell-desktop px-4 py-3">' + (u.enabled == 1 ? '<span class="badge-green">Yes</span>' : '<span class="badge-red">No</span>') + '</td>';
                     h += '<td class="cell-desktop px-4 py-3 text-xs text-zinc-400 dark:text-zinc-500">' + (u.created_at ? u.created_at.replace(' ', '<br>') : '-') + '</td>';
-                    h += '<td class="cell-desktop px-4 py-3"><div class="flex items-center gap-3">' + (window.SSC && window.SSC.canModifyOwnPasswordOnly ? '<button class="update-password-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + u.id + '" data-username="' + u.username + '">Update Password</button>' : '<button class="edit-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + u.id + '" data-username="' + u.username + '" data-name="' + (u.name||'').replace(/"/g,'&quot;') + '" data-role="' + u.role + '" data-audit="' + u.can_manage_audit_logs + '" data-manage="' + u.can_manage_accounts + '" data-delete-election="' + (u.can_delete_election || 0) + '" data-export-csv="' + (u.can_export_csv || 0) + '" data-edit-info="' + (u.can_edit_info || 0) + '" data-manage-vote="' + (u.can_manage_vote || 0) + '" data-enabled="' + u.enabled + '" data-modify-own="' + (u.can_modify_own_password_only || 0) + '">Edit</button>' + (isSelf ? '' : '<button class="del-btn text-red-500 hover:text-red-400 text-sm font-semibold" data-id="' + u.id + '" data-name="' + (u.name||'').replace(/"/g,'&quot;') + '">Delete</button>')) + '</div></td>';
+                    h += '<td class="cell-desktop px-4 py-3"><div class="flex items-center gap-3">' + (window.SSC && window.SSC.canModifyOwnPasswordOnly ? '<button class="update-password-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + u.id + '" data-username="' + u.username + '">Update Password</button>' : '<button class="edit-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + u.id + '" data-username="' + u.username + '" data-name="' + (u.name||'').replace(/"/g,'&quot;') + '" data-role="' + u.role + '" data-audit="' + u.can_manage_audit_logs + '" data-manage="' + u.can_manage_accounts + '" data-delete-election="' + (u.can_delete_election || 0) + '" data-export-csv="' + (u.can_export_csv || 0) + '" data-edit-info="' + (u.can_edit_info || 0) + '" data-manage-vote="' + (u.can_manage_vote || 0) + '" data-manage-sessions="' + (u.can_manage_sessions || 0) + '" data-enabled="' + u.enabled + '" data-modify-own="' + (u.can_modify_own_password_only || 0) + '">Edit</button>' + (isSelf ? '' : '<button class="del-btn text-red-500 hover:text-red-400 text-sm font-semibold" data-id="' + u.id + '" data-name="' + (u.name||'').replace(/"/g,'&quot;') + '">Delete</button>')) + '</div></td>';
                     h += '<td class="cell-mobile px-4 py-3" colspan="7"><div class="space-y-2">';
                     h += '<div class="flex items-center justify-between"><div class="flex items-center gap-2"><input type="checkbox" value="' + u.id + '" ' + c + ' class="user-cb rounded"><span class="font-semibold text-zinc-900 dark:text-white">' + u.username + '</span></div><span class="badge-blue text-xs">' + u.role + '</span></div>';
                     h += '<p class="text-zinc-600 dark:text-zinc-400">' + u.name + '</p>';
                     h += '<div class="flex items-center gap-2 text-xs"><span class="text-zinc-500">Enabled: ' + (u.enabled == 1 ? '<span class="badge-green text-xs">Yes</span>' : '<span class="badge-red text-xs">No</span>') + '</span></div>';
                     h += '<div class="flex items-center gap-2 text-xs"><span class="text-zinc-400 dark:text-zinc-500">Created: ' + (u.created_at ? u.created_at.replace(' ', ' ') : '-') + '</span></div>';
-                    h += '<div class="flex items-center gap-3 pt-1">' + (window.SSC && window.SSC.canModifyOwnPasswordOnly ? '<button class="update-password-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + u.id + '" data-username="' + u.username + '">Update Password</button>' : '<button class="edit-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + u.id + '" data-username="' + u.username + '" data-name="' + (u.name||'').replace(/"/g,'&quot;') + '" data-role="' + u.role + '" data-audit="' + u.can_manage_audit_logs + '" data-manage="' + u.can_manage_accounts + '" data-delete-election="' + (u.can_delete_election || 0) + '" data-export-csv="' + (u.can_export_csv || 0) + '" data-edit-info="' + (u.can_edit_info || 0) + '" data-manage-vote="' + (u.can_manage_vote || 0) + '" data-enabled="' + u.enabled + '" data-modify-own="' + (u.can_modify_own_password_only || 0) + '">Edit</button>' + (isSelf ? '' : '<button class="del-btn text-red-500 hover:text-red-400 text-sm font-semibold" data-id="' + u.id + '" data-name="' + (u.name||'').replace(/"/g,'&quot;') + '">Delete</button>')) + '</div></td></tr>';
+                    h += '<div class="flex items-center gap-3 pt-1">' + (window.SSC && window.SSC.canModifyOwnPasswordOnly ? '<button class="update-password-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + u.id + '" data-username="' + u.username + '">Update Password</button>' : '<button class="edit-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + u.id + '" data-username="' + u.username + '" data-name="' + (u.name||'').replace(/"/g,'&quot;') + '" data-role="' + u.role + '" data-audit="' + u.can_manage_audit_logs + '" data-manage="' + u.can_manage_accounts + '" data-delete-election="' + (u.can_delete_election || 0) + '" data-export-csv="' + (u.can_export_csv || 0) + '" data-edit-info="' + (u.can_edit_info || 0) + '" data-manage-vote="' + (u.can_manage_vote || 0) + '" data-manage-sessions="' + (u.can_manage_sessions || 0) + '" data-enabled="' + u.enabled + '" data-modify-own="' + (u.can_modify_own_password_only || 0) + '">Edit</button>' + (isSelf ? '' : '<button class="del-btn text-red-500 hover:text-red-400 text-sm font-semibold" data-id="' + u.id + '" data-name="' + (u.name||'').replace(/"/g,'&quot;') + '">Delete</button>')) + '</div></td></tr>';
                 }
             }
             document.getElementById('usersTableBody').innerHTML = h;
@@ -411,7 +425,7 @@
             for (var l = 0; l < cbs.length; l++) { if (window.SSC && window.SSC.canModifyOwnPasswordOnly) { cbs[l].parentElement.classList.add('hidden'); continue; } cbs[l].addEventListener('change', function() { if (this.checked) selectedUsers.add(this.value); else selectedUsers.delete(this.value); updateBulkBtn(); }); }
             if (window.SSC && window.SSC.canModifyOwnPasswordOnly) { document.getElementById('selectAll').parentElement.parentElement.classList.add('hidden'); }
             var editBtns = document.querySelectorAll('#usersTableBody .edit-btn');
-            for (var m = 0; m < editBtns.length; m++) { editBtns[m].addEventListener('click', function() { openUserModal(this.dataset.id, this.dataset.username, this.dataset.name, this.dataset.role, this.dataset.audit, this.dataset.manage, this.dataset.deleteElection || '0', this.dataset.exportCsv || '0', this.dataset.editInfo || '0', this.dataset.manageVote || '0', this.dataset.enabled, this.dataset.modifyOwn || '0'); }); }
+            for (var m = 0; m < editBtns.length; m++) { editBtns[m].addEventListener('click', function() { openUserModal(this.dataset.id, this.dataset.username, this.dataset.name, this.dataset.role, this.dataset.audit, this.dataset.manage, this.dataset.deleteElection || '0', this.dataset.exportCsv || '0', this.dataset.editInfo || '0', this.dataset.manageVote || '0', this.dataset.enabled, this.dataset.modifyOwn || '0', this.dataset.manageSessions || '0'); }); }
             var pwBtns = document.querySelectorAll('#usersTableBody .update-password-btn');
             for (var p = 0; p < pwBtns.length; p++) { pwBtns[p].addEventListener('click', function() { openUserModal(this.dataset.id); }); }
             var delBtns = document.querySelectorAll('#usersTableBody .del-btn');

@@ -21,9 +21,9 @@ class DashboardController extends Controller {
         error_log('Admin data: ' . print_r($adminData, true));
         $pdo = Model::db();
         $adminId = isset($adminData['user_id']) ? (int)$adminData['user_id'] : 0;
-        $flags = ['can_manage_audit_logs'=>0,'can_manage_accounts'=>0,'can_edit_info'=>0,'can_manage_vote'=>0,'can_modify_own_password_only'=>0];
+        $flags = ['can_manage_audit_logs'=>0,'can_manage_accounts'=>0,'can_edit_info'=>0,'can_manage_vote'=>0,'can_manage_sessions'=>0,'can_modify_own_password_only'=>0];
         if ($adminId) {
-            $stmt = $pdo->prepare("SELECT can_manage_audit_logs, can_manage_accounts, can_edit_info, can_manage_vote, can_modify_own_password_only FROM users WHERE id = ? LIMIT 1");
+            $stmt = $pdo->prepare("SELECT can_manage_audit_logs, can_manage_accounts, can_edit_info, can_manage_vote, can_manage_sessions, can_modify_own_password_only FROM users WHERE id = ? LIMIT 1");
             $stmt->execute([$adminId]);
             $row = $stmt->fetch();
             if ($row) {
@@ -34,6 +34,7 @@ class DashboardController extends Controller {
         $canManageAccounts = isset($flags['can_manage_accounts']) && $flags['can_manage_accounts'] == 1;
         $canEditInfo = isset($flags['can_edit_info']) && $flags['can_edit_info'] == 1;
         $canManageVote = isset($flags['can_manage_vote']) && $flags['can_manage_vote'] == 1;
+        $canManageSessions = isset($flags['can_manage_sessions']) && $flags['can_manage_sessions'] == 1;
         
         // Check site status
         $stmt = $pdo->query("SELECT enable_site FROM votingswitch LIMIT 1");

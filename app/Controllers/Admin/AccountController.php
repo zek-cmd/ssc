@@ -85,7 +85,7 @@ $search = $this->getSearch();
         
         $currentUserId = $this->getCurrentUserId();
         $countSql = "SELECT COUNT(*) FROM users";
-        $dataSql = "SELECT id, username, name, role, can_manage_audit_logs, can_manage_accounts, can_delete_election, can_export_csv, can_edit_info, can_manage_vote, enabled, can_modify_own_password_only, created_at FROM users";
+        $dataSql = "SELECT id, username, name, role, can_manage_audit_logs, can_manage_accounts, can_delete_election, can_export_csv, can_edit_info, can_manage_vote, can_manage_sessions, enabled, can_modify_own_password_only, created_at FROM users";
         
         if ($isRestricted) {
             $where = " WHERE id = ?";
@@ -147,6 +147,7 @@ $search = $this->getSearch();
         $canExportCsv = isset($_POST['can_export_csv']) ? 1 : 0;
         $canEditInfo = isset($_POST['can_edit_info']) ? 1 : 0;
         $canManageVote = isset($_POST['can_manage_vote']) ? 1 : 0;
+        $canManageSessions = isset($_POST['can_manage_sessions']) ? 1 : 0;
         $enabled = isset($_POST['enabled']) ? 1 : 0;
         $confirmPassword = $_POST['confirm_password'] ?? '';
         if (!empty($password) && $password !== $confirmPassword) {
@@ -219,9 +220,13 @@ $search = $this->getSearch();
             return $this->json(['success' => false, 'error' => 'You cannot remove your own manage vote access'], 422);
         }
 
+        if ($id && $id == $currentUserId && $canManageSessions == 0) {
+            return $this->json(['success' => false, 'error' => 'You cannot remove your own manage sessions access'], 422);
+        }
+
         try {
             if ($id) {
-                $stmt = $pdo->prepare("SELECT username, name, role, can_manage_audit_logs, can_manage_accounts, can_delete_election, can_export_csv, can_edit_info, can_manage_vote, enabled, can_modify_own_password_only FROM users WHERE id = ?");
+                $stmt = $pdo->prepare("SELECT username, name, role, can_manage_audit_logs, can_manage_accounts, can_delete_election, can_export_csv, can_edit_info, can_manage_vote, can_manage_sessions, enabled, can_modify_own_password_only FROM users WHERE id = ?");
                 $stmt->execute([$id]);
                 $existing = $stmt->fetch();
                 
@@ -236,11 +241,11 @@ $search = $this->getSearch();
                 
                 if (!empty($password)) {
                     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-                    $stmt = $pdo->prepare("UPDATE users SET username = ?, password = ?, name = ?, role = ?, can_manage_audit_logs = ?, can_manage_accounts = ?, can_delete_election = ?, can_export_csv = ?, can_edit_info = ?, can_manage_vote = ?, enabled = ?, can_modify_own_password_only = ? WHERE id = ?");
-                    $stmt->execute([$username, $hashedPassword, $name, $role, $canManageAuditLogs, $canManageAccounts, $canDeleteElection, $canExportCsv, $canEditInfo, $canManageVote, $enabled, $canModifyOwnPasswordOnly, $id]);
+                    $stmt = $pdo->prepare("UPDATE users SET username = ?, password = ?, name = ?, role = ?, can_manage_audit_logs = ?, can_manage_accounts = ?, can_delete_election = ?, can_export_csv = ?, can_edit_info = ?, can_manage_vote = ?, can_manage_sessions = ?, enabled = ?, can_modify_own_password_only = ? WHERE id = ?");
+                    $stmt->execute([$username, $hashedPassword, $name, $role, $canManageAuditLogs, $canManageAccounts, $canDeleteElection, $canExportCsv, $canEditInfo, $canManageVote, $canManageSessions, $enabled, $canModifyOwnPasswordOnly, $id]);
                 } else {
-                    $stmt = $pdo->prepare("UPDATE users SET username = ?, name = ?, role = ?, can_manage_audit_logs = ?, can_manage_accounts = ?, can_delete_election = ?, can_export_csv = ?, can_edit_info = ?, can_manage_vote = ?, enabled = ?, can_modify_own_password_only = ? WHERE id = ?");
-                    $stmt->execute([$username, $name, $role, $canManageAuditLogs, $canManageAccounts, $canDeleteElection, $canExportCsv, $canEditInfo, $canManageVote, $enabled, $canModifyOwnPasswordOnly, $id]);
+                    $stmt = $pdo->prepare("UPDATE users SET username = ?, name = ?, role = ?, can_manage_audit_logs = ?, can_manage_accounts = ?, can_delete_election = ?, can_export_csv = ?, can_edit_info = ?, can_manage_vote = ?, can_manage_sessions = ?, enabled = ?, can_modify_own_password_only = ? WHERE id = ?");
+                    $stmt->execute([$username, $name, $role, $canManageAuditLogs, $canManageAccounts, $canDeleteElection, $canExportCsv, $canEditInfo, $canManageVote, $canManageSessions, $enabled, $canModifyOwnPasswordOnly, $id]);
                 }
                 
                 $changed = ($existing['username'] !== $username || $existing['name'] !== $name || $existing['role'] !== $role || (int)$existing['can_manage_audit_logs'] !== $canManageAuditLogs || (int)$existing['can_manage_accounts'] !== $canManageAccounts || (int)$existing['can_delete_election'] !== $canDeleteElection || (int)$existing['can_export_csv'] !== $canExportCsv || (int)$existing['can_edit_info'] !== $canEditInfo || (int)$existing['can_manage_vote'] !== $canManageVote || (int)$existing['enabled'] !== $enabled || !empty($password));
@@ -258,8 +263,8 @@ $search = $this->getSearch();
                 }
                 
                 $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-                $stmt = $pdo->prepare("INSERT INTO users (username, password, name, role, can_manage_audit_logs, can_manage_accounts, can_delete_election, can_export_csv, can_edit_info, can_manage_vote, enabled, can_modify_own_password_only) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                $stmt->execute([$username, $hashedPassword, $name, $role, $canManageAuditLogs, $canManageAccounts, $canDeleteElection, $canExportCsv, $canEditInfo, $canManageVote, $enabled, $canModifyOwnPasswordOnly]);
+                $stmt = $pdo->prepare("INSERT INTO users (username, password, name, role, can_manage_audit_logs, can_manage_accounts, can_delete_election, can_export_csv, can_edit_info, can_manage_vote, can_manage_sessions, enabled, can_modify_own_password_only) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$username, $hashedPassword, $name, $role, $canManageAuditLogs, $canManageAccounts, $canDeleteElection, $canExportCsv, $canEditInfo, $canManageVote, $canManageSessions, $enabled, $canModifyOwnPasswordOnly]);
                 $newId = $pdo->lastInsertId();
                 $newValues = ['message' => 'Account created'];
                 $this->audit('users', 'CREATE', $newId, null, $newValues, "Created user: {$name} ({$username})");
@@ -280,7 +285,8 @@ $search = $this->getSearch();
                         $canExportCsv,
                         $canEditInfo,
                         $canManageVote,
-                        $canModifyOwnPasswordOnly
+                        $canModifyOwnPasswordOnly,
+                        $canManageSessions
                     );
                 }
             }

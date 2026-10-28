@@ -20,6 +20,9 @@ class SessionService {
                 'httponly' => true,
                 'samesite' => 'Strict'
             ]);
+            // Keep sessions in the database so admins can list and revoke them
+            DbSessionHandler::ensureTable();
+            session_set_save_handler(new DbSessionHandler(), true);
             session_start();
         }
         
@@ -31,6 +34,25 @@ class SessionService {
         self::rotateSessionId();
     }
     
+    // Who is logged in on the current session (used to fill the sessions table)
+    public static function currentOwner() {
+        $voter = null;
+        if (isset($_SESSION[self::$namespace])) {
+            $voter = self::decrypt($_SESSION[self::$namespace]);
+        }
+        if ($voter && ($voter['logged_in'] ?? false) === true) {
+            return ['user_type' => 'voter', 'user_id' => (int)($voter['user_id'] ?? 0) ?: null];
+        }
+        $admin = null;
+        if (isset($_SESSION[self::$adminNamespace])) {
+            $admin = self::decrypt($_SESSION[self::$adminNamespace]);
+        }
+        if ($admin && ($admin['logged_in'] ?? false) === true) {
+            return ['user_type' => 'admin', 'user_id' => (int)($admin['user_id'] ?? 0) ?: null];
+        }
+        return ['user_type' => 'guest', 'user_id' => null];
+    }
+
     private static function rotateSessionId() {
         $lastRotation = $_SESSION['session_rotated'] ?? 0;
         if (time() - $lastRotation > 1800) {
@@ -161,7 +183,7 @@ class SessionService {
         return true;
     }
     
-   public static function setAdminSession($username, $userId, $role, $canManageAuditLogs = 0, $canManageAccounts = 0, $name = '', $canDeleteElection = 0, $canExportCsv = 0, $canEditInfo = 0, $canManageVote = 0, $canModifyOwnPasswordOnly = 0) {
+   public static function setAdminSession($username, $userId, $role, $canManageAuditLogs = 0, $canManageAccounts = 0, $name = '', $canDeleteElection = 0, $canExportCsv = 0, $canEditInfo = 0, $canManageVote = 0, $canModifyOwnPasswordOnly = 0, $canManageSessions = 0) {
     $data = [
         'logged_in' => true,
         'username' => $username,
@@ -175,6 +197,7 @@ class SessionService {
         'can_edit_info' => $canEditInfo,
         'can_manage_vote' => $canManageVote,
         'can_modify_own_password_only' => $canModifyOwnPasswordOnly,
+        'can_manage_sessions' => $canManageSessions,
         'login_time' => time(),
         'last_activity' => time(),
         'ip' => \App\Services\SecurityService::getClientIP(),
@@ -205,19 +228,21 @@ class SessionService {
         $userId = (int)$adminData['user_id'];
         $pdo = \App\Core\Model::db();
         if (!$pdo || !$userId) return false;
-        $stmt = $pdo->prepare("SELECT role, can_manage_audit_logs, can_manage_accounts, can_delete_election, can_export_csv, can_edit_info, can_manage_vote, can_modify_own_password_only FROM users WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT role, can_manage_audit_logs, can_manage_accounts, can_delete_election, can_export_csv, can_edit_info, can_manage_vote, can_manage_sessions, can_modify_own_password_only FROM users WHERE id = ?");
         $stmt->execute([$userId]);
         $row = $stmt->fetch();
         if (!$row) return false;
         $changed = ($adminData['user_role'] ?? '') !== $row['role'] ||
                    (int)($adminData['can_manage_accounts'] ?? 0) !== (int)$row['can_manage_accounts'] ||
+                   (int)($adminData['can_manage_sessions'] ?? 0) !== (int)$row['can_manage_sessions'] ||
                    (int)($adminData['can_modify_own_password_only'] ?? 0) !== (int)$row['can_modify_own_password_only'];
         if ($changed) {
             self::setAdminSession(
                 $adminData['username'], $userId, $row['role'],
                 (int)$row['can_manage_audit_logs'], (int)$row['can_manage_accounts'],
                 $adminData['name'] ?? '', (int)$row['can_delete_election'], (int)$row['can_export_csv'],
-                (int)$row['can_edit_info'], (int)$row['can_manage_vote'], (int)$row['can_modify_own_password_only']
+                (int)$row['can_edit_info'], (int)$row['can_manage_vote'], (int)$row['can_modify_own_password_only'],
+                (int)$row['can_manage_sessions']
             );
             return true;
         }

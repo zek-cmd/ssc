@@ -140,6 +140,7 @@ CREATE TABLE `users` (
   `can_export_csv` tinyint(1) NOT NULL DEFAULT '0',
   `can_edit_info` tinyint(1) NOT NULL DEFAULT '0',
   `can_manage_vote` tinyint(1) NOT NULL DEFAULT '0',
+  `can_manage_sessions` tinyint(1) NOT NULL DEFAULT '0',
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -429,6 +430,7 @@ ALTER TABLE `users` ADD COLUMN `can_delete_election` TINYINT(1) NOT NULL DEFAULT
 ALTER TABLE `users` ADD COLUMN `can_export_csv` TINYINT(1) NOT NULL DEFAULT '0';
 ALTER TABLE `users` ADD COLUMN `can_edit_info` TINYINT(1) NOT NULL DEFAULT '0';
 ALTER TABLE `users` ADD COLUMN `can_manage_vote` TINYINT(1) NOT NULL DEFAULT '0';
+ALTER TABLE `users` ADD COLUMN `can_manage_sessions` TINYINT(1) NOT NULL DEFAULT '0';
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
