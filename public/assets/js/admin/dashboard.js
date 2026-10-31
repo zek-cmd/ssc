@@ -2,6 +2,7 @@
     var csrfToken = window.SSC.csrfToken;
     var appUrl = window.SSC.appUrl;
     var isSuperAdmin = window.SSC.isSuperAdmin === true;
+    var canEditInfo = window.SSC.canEditInfo === true;
     var pages = { positions: 1, candidates: 1, partylists: 1 };
     var limits = { positions: 12, candidates: 12, partylists: 12 };
     var selected = { positions: new Set(), candidates: new Set(), partylists: new Set() };
@@ -199,7 +200,7 @@
             else if (section === 'sections') loadSections();
         }
         
-        if (dynamicAddBtn && isSuperAdmin) {
+        if (dynamicAddBtn && canEditInfo) {
             dynamicAddBtn.classList.remove('hidden');
             dynamicAddBtn.classList.add('flex');
         }
@@ -373,7 +374,7 @@ if (mobileMenuBtn && mobileMenu) {
     }
 
     function updateBulkBtn(section, selector) {
-        if (!isSuperAdmin) return;
+        if (!canEditInfo) return;
         var btn = document.querySelector(selector);
         if (!btn) return;
         var sel = selected[section];
@@ -382,7 +383,7 @@ if (mobileMenuBtn && mobileMenu) {
     }
 
     function setupSelectAll(selectAllSelector, tbodyId, section, btnSelector) {
-        if (!isSuperAdmin) return;
+        if (!canEditInfo) return;
         var selectAll = document.querySelector(selectAllSelector);
         if (!selectAll) return;
         selectAll.addEventListener('change', function() {
@@ -397,7 +398,7 @@ if (mobileMenuBtn && mobileMenu) {
     }
 
 function setupBulkDelete(btnSelector, section, loadFn, apiUrl) {
-    if (!isSuperAdmin) return;
+    if (!canEditInfo) return;
     var btn = document.querySelector(btnSelector);
     if (!btn) return;
     
@@ -433,7 +434,7 @@ function setupBulkDelete(btnSelector, section, loadFn, apiUrl) {
     });
 }
 
-    if (isSuperAdmin) {
+    if (canEditInfo) {
         var positionSearch = document.getElementById('positionSearch');
 if (positionSearch) {
     var positionSearchTimer = null;
@@ -462,7 +463,7 @@ if (positionSearch) {
     }
 
     function initSortablePositions() {
-        if (!isSuperAdmin) return;
+        if (!canEditInfo) return;
         var tbody = document.getElementById('positionsTableBody');
         if (!tbody) return;
         if (sortablePositions) { sortablePositions.destroy(); sortablePositions = null; }
@@ -487,7 +488,7 @@ if (positionSearch) {
     }
 
     function openPositionModal(id, name, desc) {
-        if (!isSuperAdmin) return;
+        if (!canEditInfo) return;
         document.getElementById('positionModal').classList.remove('hidden');
         var scrollContainer = document.querySelector('#positionModal .overflow-y-auto');
         if (scrollContainer) scrollContainer.scrollTop = 0;
@@ -500,22 +501,22 @@ if (positionSearch) {
         var params = '?page=' + page + '&target=' + PAGE_TARGET; if (search) params += '&search=' + encodeURIComponent(search);
         apiGet(appUrl + '/admin/api/positions' + params, function(data) {
             if (data.limit) limits.positions = data.limit;
-            var h = '', colspan = isSuperAdmin ? 5 : 2;
+            var h = '', colspan = canEditInfo ? 5 : 2;
             if (!data.data.length) h = '<tr><td colspan="' + colspan + '" class="px-4 py-8 text-center text-zinc-500">No positions</td></tr>';
             else {
                 for (var i = 0; i < data.data.length; i++) {
                     var p = data.data[i];
                     var c = selected.positions.has(p.id.toString()) ? 'checked' : '';
                     h += '<tr class="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 row-fixed">';
-                    if (isSuperAdmin) { h += '<td class="cell-desktop px-4 py-3"><input type="checkbox" value="' + p.id + '" ' + c + ' class="pos-cb rounded"></td>'; h += '<td class="cell-desktop px-4 py-3 w-10"><span class="drag-handle cursor-grab text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 opacity-0 select-none w-4 h-4 inline-block"></span></td>'; }
+                    if (canEditInfo) { h += '<td class="cell-desktop px-4 py-3"><input type="checkbox" value="' + p.id + '" ' + c + ' class="pos-cb rounded"></td>'; h += '<td class="cell-desktop px-4 py-3 w-10"><span class="drag-handle cursor-grab text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 opacity-0 select-none w-4 h-4 inline-block"></span></td>'; }
                     h += '<td class="cell-desktop px-4 py-3 font-semibold text-zinc-900 dark:text-white"><span class="block truncate">' + p.name + '</span></td>';
                     h += '<td class="cell-desktop px-4 py-3 text-zinc-600 dark:text-zinc-400"><span class="block truncate">' + (p.description || '-') + '</span></td>';
-                    if (isSuperAdmin) h += '<td class="cell-desktop px-4 py-3"><div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + p.id + '" data-name="' + (p.name||'').replace(/"/g,'&quot;') + '" data-desc="' + (p.description||'').replace(/"/g,'&quot;') + '" data-sort="' + p.sort_order + '">Edit</button><button class="del-btn text-red-500 hover:text-red-400 text-sm font-semibold" data-id="' + p.id + '">Delete</button></div></td>';
+                    if (canEditInfo) h += '<td class="cell-desktop px-4 py-3"><div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + p.id + '" data-name="' + (p.name||'').replace(/"/g,'&quot;') + '" data-desc="' + (p.description||'').replace(/"/g,'&quot;') + '" data-sort="' + p.sort_order + '">Edit</button><button class="del-btn text-red-500 hover:text-red-400 text-sm font-semibold" data-id="' + p.id + '">Delete</button></div></td>';
                     h += '<td class="cell-mobile px-4 py-3" colspan="' + colspan + '"><div class="space-y-2 mobile-card-fixed">';
                     h += '<div class="flex items-center justify-between"><div class="flex items-center gap-2 min-w-0">';
-                    if (isSuperAdmin) h += '<input type="checkbox" value="' + p.id + '" ' + c + ' class="pos-cb rounded shrink-0"><span class="drag-handle cursor-grab text-zinc-400 shrink-0 opacity-0 select-none w-4 h-4 inline-block"></span>';
+                    if (canEditInfo) h += '<input type="checkbox" value="' + p.id + '" ' + c + ' class="pos-cb rounded shrink-0"><span class="drag-handle cursor-grab text-zinc-400 shrink-0 opacity-0 select-none w-4 h-4 inline-block"></span>';
                     h += '<span class="font-semibold text-zinc-900 dark:text-white truncate">' + p.name + '</span></div>';
-                    if (isSuperAdmin) h += '<div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + p.id + '" data-name="' + (p.name||'').replace(/"/g,'&quot;') + '" data-desc="' + (p.description||'').replace(/"/g,'&quot;') + '" data-sort="' + p.sort_order + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button><button class="del-btn text-red-500 hover:text-red-400 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + p.id + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></div>';
+                    if (canEditInfo) h += '<div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + p.id + '" data-name="' + (p.name||'').replace(/"/g,'&quot;') + '" data-desc="' + (p.description||'').replace(/"/g,'&quot;') + '" data-sort="' + p.sort_order + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button><button class="del-btn text-red-500 hover:text-red-400 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + p.id + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></div>';
                     h += '<p class="text-zinc-600 dark:text-zinc-400 text-sm truncate">' + (p.description || '-') + '</p>';
                     h += '</div></td></tr>';
                 }
@@ -523,7 +524,7 @@ if (positionSearch) {
             document.getElementById('positionsTableBody').innerHTML = safeHTML(h);
             renderPagination('positionsInfo', 'positionsPages', data, loadPositions);
             if (data.pad) { applyBodyMinHeight('positionsTableBody', limits.positions); } else { clearBodyMinHeight('positionsTableBody'); }
-            if (isSuperAdmin) {
+            if (canEditInfo) {
                 var cbs = document.querySelectorAll('.pos-cb');
                 for (var j = 0; j < cbs.length; j++) { cbs[j].addEventListener('change', function() { if (this.checked) selected.positions.add(this.value); else selected.positions.delete(this.value); updateBulkBtn('positions', '.bulk-delete-positions'); }); }
                 var saPos = document.querySelector('.select-all-positions');
@@ -547,7 +548,7 @@ if (positionSearch) {
         });
     }
 
-    if (isSuperAdmin) {
+    if (canEditInfo) {
         var candidateSearch = document.getElementById('candidateSearch');
 if (candidateSearch) {
     var candidateSearchTimer = null;
@@ -599,7 +600,7 @@ if (candidateSearch) {
     }
 
     function openCandidateModal(id, name, posId, plId, platform, imagePath, isDefaultWinner) {
-        if (!isSuperAdmin) return;
+        if (!canEditInfo) return;
         document.getElementById('candidateModal').classList.remove('hidden');
         var scrollContainer = document.querySelector('#candidateModal .overflow-y-auto');
         if (scrollContainer) scrollContainer.scrollTop = 0;
@@ -639,24 +640,24 @@ if (candidateSearch) {
         var params = '?page=' + page + '&target=' + PAGE_TARGET; if (search) params += '&search=' + encodeURIComponent(search);
         apiGet(appUrl + '/admin/api/candidates' + params, function(data) {
             if (data.limit) limits.candidates = data.limit;
-            var h = '', colspan = isSuperAdmin ? 6 : 4;
+            var h = '', colspan = canEditInfo ? 6 : 4;
             if (!data.data.length) h = '<tr><td colspan="' + colspan + '" class="px-4 py-8 text-center text-zinc-500">No candidates</td></tr>';
             else {
                 for (var i = 0; i < data.data.length; i++) {
                     var c = data.data[i];
                     var ch = selected.candidates.has(c.id.toString()) ? 'checked' : '';
                     h += '<tr class="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 row-fixed">';
-                    if (isSuperAdmin) h += '<td class="cell-desktop px-4 py-3"><input type="checkbox" value="' + c.id + '" ' + ch + ' class="cand-cb rounded"></td>';
+                    if (canEditInfo) h += '<td class="cell-desktop px-4 py-3"><input type="checkbox" value="' + c.id + '" ' + ch + ' class="cand-cb rounded"></td>';
                     h += '<td class="cell-desktop px-4 py-3"><img src="' + (c.image_path ? window.SSC.candidateImagesUrl + '/' + c.image_path : '') + '" class="candidate-thumb w-10 h-10 rounded-full object-cover ring-1 ring-zinc-200/60 dark:ring-zinc-700/60"></td>';
                     h += '<td class="cell-desktop px-4 py-3 font-semibold text-zinc-900 dark:text-white"><div class="flex items-center gap-2 min-w-0"><span class="truncate">' + c.name + '</span>' + (c.is_default_winner ? '<span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300">Winner</span>' : '') + '</div></td>';
                     h += '<td class="cell-desktop px-4 py-3 text-zinc-600 dark:text-zinc-400"><span class="block truncate">' + (c.position_name || '-') + '</span></td>';
                     h += '<td class="cell-desktop px-4 py-3 text-zinc-600 dark:text-zinc-400"><span class="block truncate">' + (c.partylist_name || '-') + '</span></td>';
-                    if (isSuperAdmin) h += '<td class="cell-desktop px-4 py-3"><div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + c.id + '" data-name="' + (c.name||'').replace(/"/g,'&quot;') + '" data-pos="' + c.position_id + '" data-pl="' + (c.partylist_id||'') + '" data-platform="' + (c.platform||'').replace(/"/g,'&quot;') + '" data-image="' + (c.image_path||'') + '" data-default-winner="' + (c.is_default_winner||0) + '">Edit</button><button class="del-btn text-red-500 hover:text-red-400 text-sm font-semibold" data-id="' + c.id + '">Delete</button></div></td>';
+                    if (canEditInfo) h += '<td class="cell-desktop px-4 py-3"><div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + c.id + '" data-name="' + (c.name||'').replace(/"/g,'&quot;') + '" data-pos="' + c.position_id + '" data-pl="' + (c.partylist_id||'') + '" data-platform="' + (c.platform||'').replace(/"/g,'&quot;') + '" data-image="' + (c.image_path||'') + '" data-default-winner="' + (c.is_default_winner||0) + '">Edit</button><button class="del-btn text-red-500 hover:text-red-400 text-sm font-semibold" data-id="' + c.id + '">Delete</button></div></td>';
                     h += '<td class="cell-mobile px-4 py-3" colspan="' + colspan + '"><div class="space-y-2 mobile-card-fixed">';
                     h += '<div class="flex items-center justify-between"><div class="flex items-center gap-2 min-w-0">';
-                    if (isSuperAdmin) h += '<input type="checkbox" value="' + c.id + '" ' + ch + ' class="cand-cb rounded shrink-0"><span class="drag-handle cursor-grab text-zinc-400 shrink-0 opacity-0 select-none w-4 h-4 inline-block"></span>';
+                    if (canEditInfo) h += '<input type="checkbox" value="' + c.id + '" ' + ch + ' class="cand-cb rounded shrink-0"><span class="drag-handle cursor-grab text-zinc-400 shrink-0 opacity-0 select-none w-4 h-4 inline-block"></span>';
                     h += '<img src="' + (c.image_path ? window.SSC.candidateImagesUrl + '/' + c.image_path : '') + '" class="candidate-thumb w-8 h-8 rounded-full object-cover shrink-0"><span class="font-semibold text-zinc-900 dark:text-white truncate min-w-0">' + c.name + '</span>' + (c.is_default_winner ? '<span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300">Winner</span>' : '') + '</div>';
-                    if (isSuperAdmin) h += '<div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + c.id + '" data-name="' + (c.name||'').replace(/"/g,'&quot;') + '" data-pos="' + c.position_id + '" data-pl="' + (c.partylist_id||'') + '" data-platform="' + (c.platform||'').replace(/"/g,'&quot;') + '" data-image="' + (c.image_path||'') + '" data-default-winner="' + (c.is_default_winner||0) + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button><button class="del-btn text-red-500 hover:text-red-400 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + c.id + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></div>';
+                    if (canEditInfo) h += '<div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + c.id + '" data-name="' + (c.name||'').replace(/"/g,'&quot;') + '" data-pos="' + c.position_id + '" data-pl="' + (c.partylist_id||'') + '" data-platform="' + (c.platform||'').replace(/"/g,'&quot;') + '" data-image="' + (c.image_path||'') + '" data-default-winner="' + (c.is_default_winner||0) + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button><button class="del-btn text-red-500 hover:text-red-400 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + c.id + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></div>';
                      h += '<div class="flex flex-col gap-1 text-xs min-w-0"><span class="text-zinc-500 truncate">' + (c.position_name || '-') + '</span>' + (c.partylist_name ? '<span data-partylist-badge="' + c.partylist_name + '" data-pl-color="' + (c.partylist_badge_color || '#1e40af') + '" data-pl-text="' + (c.partylist_badge_text_color || '#ffffff') + '" class="text-xs truncate inline-block self-start px-1.5 py-0.5 rounded pl-badge border border-zinc-300 dark:border-zinc-600">' + c.partylist_name + '</span>' : '') + '</div>';
                     h += '</div></td></tr>';
 
@@ -667,7 +668,7 @@ if (candidateSearch) {
             for (var t = 0; t < thumbs.length; t++) { thumbs[t].addEventListener('error', function() { this.style.display = 'none'; }); }
             renderPagination('candidatesInfo', 'candidatesPages', data, loadCandidates);
             if (data.pad) { applyBodyMinHeight('candidatesTableBody', limits.candidates); } else { clearBodyMinHeight('candidatesTableBody'); }
-            if (isSuperAdmin) {
+            if (canEditInfo) {
                 var cbs = document.querySelectorAll('.cand-cb');
                 for (var j = 0; j < cbs.length; j++) { cbs[j].addEventListener('change', function() { if (this.checked) selected.candidates.add(this.value); else selected.candidates.delete(this.value); updateBulkBtn('candidates', '.bulk-delete-candidates'); }); }
                 var saCand = document.querySelector('.select-all-candidates');
@@ -690,7 +691,7 @@ if (candidateSearch) {
         });
     }
 
-    if (isSuperAdmin) {
+    if (canEditInfo) {
         var partylistSearch = document.getElementById('partylistSearch');
 if (partylistSearch) {
     var partylistSearchTimer = null;
@@ -719,7 +720,7 @@ if (partylistSearch) {
     }
 
     function initSortablePartylists() {
-        if (!isSuperAdmin) return;
+        if (!canEditInfo) return;
         var tbody = document.getElementById('partylistsTableBody');
         if (!tbody) return;
         if (sortablePartylists) { sortablePartylists.destroy(); sortablePartylists = null; }
@@ -744,7 +745,7 @@ if (partylistSearch) {
     }
 
     function openPartylistModal(id, name, desc, badgeColor, badgeTextColor) {
-        if (!isSuperAdmin) return;
+        if (!canEditInfo) return;
         document.getElementById('partylistModal').classList.remove('hidden');
         var scrollContainer = document.querySelector('#partylistModal .overflow-y-auto');
         if (scrollContainer) scrollContainer.scrollTop = 0;
@@ -776,22 +777,22 @@ if (partylistSearch) {
         var params = '?page=' + page + '&target=' + PAGE_TARGET; if (search) params += '&search=' + encodeURIComponent(search);
         apiGet(appUrl + '/admin/api/partylists' + params, function(data) {
             if (data.limit) limits.partylists = data.limit;
-            var h = '', colspan = isSuperAdmin ? 5 : 2;
+            var h = '', colspan = canEditInfo ? 5 : 2;
             if (!data.data.length) h = '<tr><td colspan="' + colspan + '" class="px-4 py-8 text-center text-zinc-500">No partylists</td></tr>';
             else {
                 for (var i = 0; i < data.data.length; i++) {
                     var p = data.data[i];
                     var c = selected.partylists.has(p.id.toString()) ? 'checked' : '';
                     h += '<tr class="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 row-fixed">';
-                    if (isSuperAdmin) { h += '<td class="cell-desktop px-4 py-3"><input type="checkbox" value="' + p.id + '" ' + c + ' class="pl-cb rounded"></td>'; h += '<td class="cell-desktop px-4 py-3 w-10"><span class="drag-handle cursor-grab text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 opacity-0 select-none w-4 h-4 inline-block"></span></td>'; }
+                    if (canEditInfo) { h += '<td class="cell-desktop px-4 py-3"><input type="checkbox" value="' + p.id + '" ' + c + ' class="pl-cb rounded"></td>'; h += '<td class="cell-desktop px-4 py-3 w-10"><span class="drag-handle cursor-grab text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 opacity-0 select-none w-4 h-4 inline-block"></span></td>'; }
                     h += '<td class="cell-desktop px-4 py-3 font-semibold text-zinc-900 dark:text-white"><span class="block truncate">' + p.name + '</span></td>';
                     h += '<td class="cell-desktop px-4 py-3 text-zinc-600 dark:text-zinc-400"><span class="block truncate">' + (p.description || '-') + '</span></td>';
-                    if (isSuperAdmin) h += '<td class="cell-desktop px-4 py-3"><div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + p.id + '" data-name="' + (p.name||'').replace(/"/g,'&quot;') + '" data-desc="' + (p.description||'').replace(/"/g,'&quot;') + '" data-badge="' + (p.badge_color || '#1e40af') + '" data-badge-text="' + (p.badge_text_color || '#ffffff') + '">Edit</button><button class="del-btn text-red-500 hover:text-red-400 text-sm font-semibold" data-id="' + p.id + '">Delete</button></div></td>';
+                    if (canEditInfo) h += '<td class="cell-desktop px-4 py-3"><div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + p.id + '" data-name="' + (p.name||'').replace(/"/g,'&quot;') + '" data-desc="' + (p.description||'').replace(/"/g,'&quot;') + '" data-badge="' + (p.badge_color || '#1e40af') + '" data-badge-text="' + (p.badge_text_color || '#ffffff') + '">Edit</button><button class="del-btn text-red-500 hover:text-red-400 text-sm font-semibold" data-id="' + p.id + '">Delete</button></div></td>';
                     h += '<td class="cell-mobile px-4 py-3" colspan="' + colspan + '"><div class="space-y-2 mobile-card-fixed">';
                     h += '<div class="flex items-center justify-between"><div class="flex items-center gap-2 min-w-0">';
-                    if (isSuperAdmin) h += '<input type="checkbox" value="' + p.id + '" ' + c + ' class="pl-cb rounded shrink-0"><span class="drag-handle cursor-grab text-zinc-400 shrink-0 opacity-0 select-none w-4 h-4 inline-block"></span>';
+                    if (canEditInfo) h += '<input type="checkbox" value="' + p.id + '" ' + c + ' class="pl-cb rounded shrink-0"><span class="drag-handle cursor-grab text-zinc-400 shrink-0 opacity-0 select-none w-4 h-4 inline-block"></span>';
                     h += '<span class="font-semibold text-zinc-900 dark:text-white truncate">' + p.name + '</span></div>';
-                    if (isSuperAdmin) h += '<div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + p.id + '" data-name="' + (p.name||'').replace(/"/g,'&quot;') + '" data-desc="' + (p.description||'').replace(/"/g,'&quot;') + '" data-badge="' + (p.badge_color || '#1e40af') + '" data-badge-text="' + (p.badge_text_color || '#ffffff') + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button><button class="del-btn text-red-500 hover:text-red-400 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + p.id + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></div>';
+                    if (canEditInfo) h += '<div class="flex items-center gap-3"><button class="edit-btn text-blue-600 hover:text-blue-500 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + p.id + '" data-name="' + (p.name||'').replace(/"/g,'&quot;') + '" data-desc="' + (p.description||'').replace(/"/g,'&quot;') + '" data-badge="' + (p.badge_color || '#1e40af') + '" data-badge-text="' + (p.badge_text_color || '#ffffff') + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button><button class="del-btn text-red-500 hover:text-red-400 flex items-center gap-1 text-sm font-semibold px-1" data-id="' + p.id + '"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></div>';
                     h += '<p class="text-zinc-600 dark:text-zinc-400 text-sm truncate">' + (p.description || '-') + '</p>';
                     h += '</div></td></tr>';
                 }
@@ -799,7 +800,7 @@ if (partylistSearch) {
             document.getElementById('partylistsTableBody').innerHTML = safeHTML(h);
             renderPagination('partylistsInfo', 'partylistsPages', data, loadPartylists);
             if (data.pad) { applyBodyMinHeight('partylistsTableBody', limits.partylists); } else { clearBodyMinHeight('partylistsTableBody'); }
-            if (isSuperAdmin) {
+            if (canEditInfo) {
                 var cbs = document.querySelectorAll('.pl-cb');
                 for (var j = 0; j < cbs.length; j++) { cbs[j].addEventListener('change', function() { if (this.checked) selected.partylists.add(this.value); else selected.partylists.delete(this.value); updateBulkBtn('partylists', '.bulk-delete-partylists'); }); }
                 var saPl = document.querySelector('.select-all-partylists');
