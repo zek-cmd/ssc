@@ -110,9 +110,18 @@ class ResultsController extends Controller {
             }, $pos['candidates']);
         }
         
+        $sectionTotals = $pdo->query("
+            SELECT s.id, s.name, COUNT(v.id) AS total_votes
+            FROM sections s
+            LEFT JOIN votes v ON v.section_id = s.id
+            GROUP BY s.id, s.name, s.sort_order
+            ORDER BY s.sort_order ASC, s.name ASC
+        ")->fetchAll();
+        
         return $this->json([
             'success' => true,
             'total_votes' => $totalVotes,
+            'section_totals' => array_map(function($r) { return ['id' => (int)$r['id'], 'name' => $r['name'], 'total_votes' => (int)$r['total_votes']]; }, $sectionTotals),
             'positions' => array_values($positions),
             'generated_at' => date('F j, Y g:i A')
         ]);

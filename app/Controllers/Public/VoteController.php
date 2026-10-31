@@ -56,6 +56,7 @@ class VoteController extends Controller {
         $isOffline = $turnstileService->isOfflineBypassed();
         $selections = [];
         $isTestVote = $this->isTestVoteEnabled();
+        $sections = Model::db()->query("SELECT id, name FROM sections ORDER BY sort_order ASC, name ASC")->fetchAll();
         
         $title = APP_NAME . ' - Vote';
         
@@ -122,12 +123,20 @@ class VoteController extends Controller {
             return $this->json(['success' => false, 'error' => 'Please enter your email address'], 422);
         }
         
+        $sectionId = (int)($_POST['section_id'] ?? 0);
+        $sectionCheck = Model::db()->prepare("SELECT id FROM sections WHERE id = ? LIMIT 1");
+        $sectionCheck->execute([$sectionId]);
+        if (!$sectionCheck->fetch()) {
+            return $this->json(['success' => false, 'error' => 'Please select your section'], 422);
+        }
+        
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return $this->json(['success' => false, 'error' => 'Please enter a valid email address'], 422);
         }
     } else {
         $name = 'TEST VOTE';
         $email = null;
+        $sectionId = null;
     }
     
     if (empty($selections) || !is_array($selections)) {
@@ -161,8 +170,8 @@ class VoteController extends Controller {
     try {
         $pdo->beginTransaction();
         
-        $stmt = $pdo->prepare("INSERT INTO votes (voter_identifier, voter_name, email, voted_at) VALUES (?, ?, ?, NOW())");
-        $stmt->execute([$voterIdentifier, $name, $email]);
+        $stmt = $pdo->prepare("INSERT INTO votes (voter_identifier, voter_name, email, section_id, voted_at) VALUES (?, ?, ?, ?, NOW())");
+        $stmt->execute([$voterIdentifier, $name, $email, $sectionId]);
         $voteId = $pdo->lastInsertId();
         
         $detailStmt = $pdo->prepare("INSERT INTO vote_details (vote_id, position_id, candidate_id) VALUES (?, ?, ?)");

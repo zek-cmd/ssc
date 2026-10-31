@@ -6,6 +6,294 @@
     var isTestVote = window.SSC.isTestVote === true;
     var stickyBtn = null;
     var positionsContainer = null;
+
+    // Section picker: tapping the box opens a modal with a search box and a list.
+    // The chosen section's ID goes into a hidden field.
+    function setupSectionPickerOld() {
+        var input = document.getElementById('sectionInput');
+        var hidden = document.getElementById('sectionSelect');
+        var list = document.getElementById('sectionList');
+        var warning = document.getElementById('sectionWarning');
+        var toggle = document.getElementById('sectionToggle');
+        var modal = document.getElementById('sectionModal');
+        var backdrop = document.getElementById('sectionModalBackdrop');
+        var closeBtn = document.getElementById('sectionModalClose');
+        var search = document.getElementById('sectionModalSearch');
+        var modalList = document.getElementById('sectionModalList');
+        var modalEmpty = document.getElementById('sectionModalEmpty');
+        var ghostTyped = document.getElementById('sectionModalGhostTyped');
+        var ghostRest = document.getElementById('sectionModalGhostRest');
+        if (!input || !hidden || !list || !modal || !search || !modalList) return;
+        var options = [];
+        for (var i = 0; i < list.options.length; i++) {
+            options.push({ name: list.options[i].value, id: list.options[i].getAttribute('data-id') || '' });
+        }
+        function pick(name) {
+            var found = null;
+            for (var i = 0; i < options.length; i++) {
+                if (options[i].name === name) { found = options[i]; break; }
+            }
+            input.value = found ? found.name : '';
+            hidden.value = found ? found.id : '';
+            if (warning) warning.classList.add('hidden');
+            closeModal();
+        }
+        function renderList(filter) {
+            var typed = filter || '';
+            var low = typed.trim().toLowerCase();
+            modalList.textContent = '';
+            var count = 0;
+            var firstMatch = '';
+            for (var i = 0; i < options.length; i++) {
+                var name = options[i].name;
+                if (low !== '' && name.toLowerCase().indexOf(low) === -1) continue;
+                if (firstMatch === '') firstMatch = name;
+                count++;
+                var item = document.createElement('button');
+                item.type = 'button';
+                item.setAttribute('role', 'option');
+                item.setAttribute('data-value', name);
+                item.className = 'block w-full text-left rounded-xl px-4 py-3 text-sm sm:text-base text-zinc-800 dark:text-zinc-100 hover:bg-blue-50 dark:hover:bg-zinc-800 focus:bg-blue-50 dark:focus:bg-zinc-800 focus:outline-none';
+                item.textContent = name;
+                modalList.appendChild(item);
+            }
+            if (modalEmpty) modalEmpty.classList.toggle('hidden', count > 0);
+            // Grey hint: the first match, shown after what the user typed.
+            var hint = (firstMatch !== '' && low !== '' && firstMatch.toLowerCase().indexOf(low) === 0 && firstMatch.length > typed.length) ? firstMatch.slice(typed.length) : '';
+            if (ghostTyped) ghostTyped.textContent = typed;
+            if (ghostRest) ghostRest.textContent = hint;
+        }
+        function openModal() {
+            search.value = '';
+            renderList('');
+            modal.classList.remove('hidden');
+            input.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+            setTimeout(function() { search.focus(); }, 50);
+        }
+        function closeModal() {
+            modal.classList.add('hidden');
+            input.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+        input.addEventListener('click', openModal);
+        input.addEventListener('focus', function() { input.blur(); openModal(); });
+        if (toggle) toggle.addEventListener('click', openModal);
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        if (backdrop) backdrop.addEventListener('click', closeModal);
+        modalList.addEventListener('click', function(e) {
+            var item = e.target.closest('[data-value]');
+            if (item) pick(item.getAttribute('data-value'));
+        });
+        search.addEventListener('input', function() { renderList(search.value); });
+        search.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            } else if ((e.key === 'Tab' || e.key === 'ArrowRight') && ghostRest && ghostRest.textContent) {
+                e.preventDefault();
+                search.value = search.value + ghostRest.textContent;
+                renderList(search.value);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                var first = modalList.querySelector('[data-value]');
+                if (first) pick(first.getAttribute('data-value'));
+            }
+        });
+        window.validateSectionPick = function() {
+            if (hidden.value) return true;
+            if (warning) warning.classList.remove('hidden');
+            openModal();
+            return false;
+        };
+    }
+    /* Old dropdown picker (no longer used)
+    function __unusedOldPicker() {
+        function updateGhost() {
+            var typed = input.value;
+            var match = '';
+            if (typed.trim() !== '') {
+                var low = typed.toLowerCase();
+                for (var i = 0; i < names.length; i++) {
+                    if (names[i].toLowerCase().indexOf(low) === 0) { match = names[i]; break; }
+                }
+            }
+            if (ghostTyped) ghostTyped.textContent = typed;
+            if (ghostRest) ghostRest.textContent = match && match.length > typed.length ? match.slice(typed.length) : '';
+        }
+        function syncId() {
+            var opt = findExact(input.value);
+            hidden.value = opt ? (opt.getAttribute('data-id') || '') : '';
+            if (warning) warning.classList.add('hidden');
+            updateGhost();
+        }
+        var menu = document.getElementById('sectionMenu');
+        var menuEmpty = document.getElementById('sectionMenuEmpty');
+        var toggle = document.getElementById('sectionToggle');
+        function renderMenu(filter) {
+            if (!menu) return;
+            var low = (filter || '').trim().toLowerCase();
+            menu.textContent = '';
+            var count = 0;
+            for (var i = 0; i < list.options.length; i++) {
+                var opt = list.options[i];
+                if (low !== '' && opt.value.toLowerCase().indexOf(low) === -1) continue;
+                count++;
+                var item = document.createElement('button');
+                item.type = 'button';
+                item.setAttribute('role', 'option');
+                item.setAttribute('data-value', opt.value);
+                item.className = 'block w-full text-left px-4 py-2 text-sm sm:text-base text-zinc-800 dark:text-zinc-100 hover:bg-blue-50 dark:hover:bg-zinc-800 focus:bg-blue-50 dark:focus:bg-zinc-800 focus:outline-none';
+                item.textContent = opt.value;
+                menu.appendChild(item);
+            }
+            if (menuEmpty) menuEmpty.classList.toggle('hidden', count > 0);
+        }
+        function openMenu() {
+            if (!menu) return;
+            renderMenu(input.value);
+            menu.classList.remove('hidden');
+            input.setAttribute('aria-expanded', 'true');
+        }
+        function closeMenu() {
+            if (menu) menu.classList.add('hidden');
+            if (menuEmpty) menuEmpty.classList.add('hidden');
+            input.setAttribute('aria-expanded', 'false');
+        }
+        function choose(value) {
+            input.value = value;
+            closeMenu();
+            syncId();
+        }
+        if (menu) {
+            menu.addEventListener('mousedown', function(e) {
+                var item = e.target.closest('[data-value]');
+                if (!item) return;
+                e.preventDefault();
+                choose(item.getAttribute('data-value'));
+            });
+        }
+        if (toggle) {
+            toggle.addEventListener('click', function() {
+                if (menu && !menu.classList.contains('hidden')) closeMenu();
+                else { input.focus(); openMenu(); }
+            });
+        }
+        input.addEventListener('focus', openMenu);
+        input.addEventListener('input', function() { openMenu(); syncId(); });
+        input.addEventListener('change', syncId);
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeMenu();
+        });
+        document.addEventListener('mousedown', function(e) {
+            if (!e.target.closest('#sectionInput') && !e.target.closest('#sectionMenu') && !e.target.closest('#sectionToggle')) closeMenu();
+        });
+        input.addEventListener('keydown', function(e) {
+            if ((e.key === 'Tab' || e.key === 'ArrowRight') && ghostRest && ghostRest.textContent) {
+                e.preventDefault();
+                input.value = input.value + ghostRest.textContent;
+                syncId();
+            }
+        });
+        input.addEventListener('blur', function() {
+            setTimeout(closeMenu, 150);
+            if (input.value.trim() !== '' && !findExact(input.value) && warning) {
+                warning.classList.remove('hidden');
+            }
+        });
+        window.validateSectionPick = function() {
+            if (findExact(input.value)) return true;
+            if (warning) warning.classList.remove('hidden');
+            input.focus();
+            return false;
+        };
+    */
+    setupSectionPickerOld();
+    // Unused SweetAlert2 picker, kept switched off.
+    function unusedSwalPicker() {
+        var input = document.getElementById('sectionInput');
+        var hidden = document.getElementById('sectionSelect');
+        var list = document.getElementById('sectionList');
+        var warning = document.getElementById('sectionWarning');
+        var toggle = document.getElementById('sectionToggle');
+        if (!input || !hidden || !list) return;
+        var options = [];
+        for (var i = 0; i < list.options.length; i++) {
+            options.push({ name: list.options[i].value, id: list.options[i].getAttribute('data-id') || '' });
+        }
+        function choose(opt) {
+            input.value = opt.name;
+            hidden.value = opt.id;
+            if (warning) warning.classList.add('hidden');
+        }
+        function openPicker() {
+            if (typeof Swal === 'undefined') return;
+            if (Swal.isVisible()) return;
+            Swal.fire({
+                title: 'Select your Section',
+                html: '<div style="position:relative;text-align:left">' +
+                    '<div id="swalSectionGhost" aria-hidden="true" style="position:absolute;inset:0;padding:.6rem .9rem;border:1px solid transparent;border-radius:.75rem;white-space:pre;overflow:hidden;pointer-events:none;box-sizing:border-box"><span id="swalGhostTyped" style="color:transparent"></span><span id="swalGhostRest" style="color:#a1a1aa"></span></div>' +
+                    '<input id="swalSectionSearch" type="search" autocomplete="off" placeholder="Type to search (e.g. IT 101)" style="position:relative;width:100%;padding:.6rem .9rem;border:1px solid #d4d4d8;border-radius:.75rem;background:transparent;box-sizing:border-box;font-size:1rem">' +
+                    '</div>' +
+                    '<div id="swalSectionList" role="listbox" style="margin-top:.75rem;max-height:50vh;overflow-y:auto;text-align:left"></div>' +
+                    '<p id="swalSectionEmpty" style="display:none;margin-top:.5rem;font-size:.875rem;color:#71717a;text-align:left">No section found</p>',
+                showConfirmButton: false,
+                showCloseButton: true,
+                focusConfirm: false,
+                width: 420,
+                didOpen: function() {
+                    var popup = Swal.getPopup();
+                    var search = popup.querySelector('#swalSectionSearch');
+                    var modalList = popup.querySelector('#swalSectionList');
+                    var empty = popup.querySelector('#swalSectionEmpty');
+                    var ghostTyped = popup.querySelector('#swalGhostTyped');
+                    var ghostRest = popup.querySelector('#swalGhostRest');
+                    var firstMatch = null;
+                    function render() {
+                        var typed = search.value;
+                        var low = typed.trim().toLowerCase();
+                        modalList.textContent = '';
+                        firstMatch = null;
+                        for (var j = 0; j < options.length; j++) {
+                            var opt = options[j];
+                            if (low !== '' && opt.name.toLowerCase().indexOf(low) === -1) continue;
+                            if (!firstMatch) firstMatch = opt;
+                            var item = document.createElement('button');
+                            item.type = 'button';
+                            item.setAttribute('role', 'option');
+                            item.style.cssText = 'display:block;width:100%;text-align:left;padding:.75rem 1rem;border-radius:.75rem;background:none;border:0;cursor:pointer;font-size:1rem;color:#27272a';
+                            item.textContent = opt.name;
+                            item.addEventListener('click', function(opt) {
+                                return function() { choose(opt); Swal.close(); };
+                            }(opt));
+                            modalList.appendChild(item);
+                        }
+                        empty.style.display = firstMatch ? 'none' : 'block';
+                        // Grey hint: the rest of the first match.
+                        var hint = (firstMatch && low !== '' && firstMatch.name.toLowerCase().indexOf(low) === 0 && firstMatch.name.length > typed.length) ? firstMatch.name.slice(typed.length) : '';
+                        ghostTyped.textContent = typed;
+                        ghostRest.textContent = hint;
+                    }
+                    search.addEventListener('input', render);
+                    search.addEventListener('keydown', function(e) {
+                        if ((e.key === 'Tab' || e.key === 'ArrowRight') && ghostRest.textContent) {
+                            e.preventDefault();
+                            search.value = search.value + ghostRest.textContent;
+                            render();
+                        } else if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (firstMatch) { choose(firstMatch); Swal.close(); }
+                        }
+                    });
+                    render();
+                    search.focus();
+                }
+            });
+        }
+        input.addEventListener('click', openPicker);
+        input.addEventListener('focus', function() { input.blur(); openPicker(); });
+        if (toggle) toggle.addEventListener('click', openPicker);
+    }
+
     var totalPositions = 0;
     var positionOrder = [];
     var positionNames = {};
@@ -495,6 +783,7 @@
             var emailInput = document.getElementById('emailInput');
             var nameValue = '';
             var emailValue = '';
+            var sectionValue = '';
             
             if (!isTestVote) {
                 if (nameInput && !nameInput.checkValidity()) {
@@ -507,8 +796,16 @@
                     return;
                 }
                 
+                var sectionSelect = document.getElementById('sectionSelect');
+                var sectionInput = document.getElementById('sectionInput');
+                if (sectionSelect && !sectionSelect.value) {
+                    if (window.validateSectionPick) window.validateSectionPick();
+                    return;
+                }
+                
                 nameValue = nameInput ? nameInput.value.trim() : '';
                 emailValue = emailInput ? emailInput.value.trim() : '';
+                sectionValue = sectionSelect ? sectionSelect.value : '';
             }
             
             collectSelections();
@@ -521,6 +818,7 @@
             if (!isTestVote) {
                 formData.append('name', nameValue);
                 formData.append('email', emailValue);
+                formData.append('section_id', sectionValue);
             }
             for (var posId in selections) {
                 formData.append('selections[' + posId + ']', selections[posId].candidate_id);

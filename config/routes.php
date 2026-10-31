@@ -155,6 +155,23 @@ return [
         'middleware' => ['Admin\AuthMiddleware', 'CsrfMiddleware']
     ],
     
+    // Sections API (e.g. IT 101, IT 102)
+    'GET /admin/api/sections' => [
+        'handler' => ['Admin\SectionController', 'getSections'],
+        'middleware' => ['Admin\AuthMiddleware']
+    ],
+    'POST /admin/api/sections' => [
+        'handler' => ['Admin\SectionController', 'saveSection'],
+        'middleware' => ['Admin\AuthMiddleware', 'CsrfMiddleware']
+    ],
+    'POST /admin/api/sections/bulk-delete' => [
+            'handler' => ['Admin\\SectionController', 'bulkDeleteSections'],
+        ],
+        'POST /admin/api/sections/delete' => [
+        'handler' => ['Admin\SectionController', 'deleteSection'],
+        'middleware' => ['Admin\AuthMiddleware', 'CsrfMiddleware']
+    ],
+
     // Vote Lookup (sidebar search)
     'GET /admin/api/votes/search' => [
         'handler' => ['Admin\ResultsController', 'searchVotes'],

@@ -5,7 +5,7 @@
     var pages = { positions: 1, candidates: 1, partylists: 1 };
     var limits = { positions: 12, candidates: 12, partylists: 12 };
     var selected = { positions: new Set(), candidates: new Set(), partylists: new Set() };
-    var sortablePositions = null, sortablePartylists = null;
+    var sortablePositions = null, sortablePartylists = null, sortableSections = null;
     var mobileMenuBtn, mobileMenu;
     var PAGE_TARGET = 12;
 
@@ -188,12 +188,15 @@
         if (sortablePositions) { sortablePositions.destroy(); sortablePositions = null; }
         if (sortablePartylists) { sortablePartylists.destroy(); sortablePartylists = null; }
         
+        var sectionsPanel = document.getElementById('sectionsSection');
+        if (sectionsPanel && section !== 'sections') sectionsPanel.classList.add('hidden');
         var sectionEl = document.getElementById(section + 'Section');
         if (sectionEl) {
             sectionEl.classList.remove('hidden');
             if (section === 'positions') loadPositions();
             else if (section === 'candidates') loadCandidates();
             else if (section === 'partylists') loadPartylists();
+            else if (section === 'sections') loadSections();
         }
         
         if (dynamicAddBtn && isSuperAdmin) {
@@ -208,6 +211,7 @@
             if (currentSection === 'positions') openPositionModal();
             else if (currentSection === 'candidates') openCandidateModal();
             else if (currentSection === 'partylists') openPartylistModal();
+            else if (currentSection === 'sections') openSectionModal();
         });
     }
 
@@ -356,6 +360,7 @@ if (mobileMenuBtn && mobileMenu) {
             var mobilePositions = document.getElementById('mobilePositionsCount');
             var mobileCandidates = document.getElementById('mobileCandidatesCount');
             var mobilePartylists = document.getElementById('mobilePartylistsCount');
+            var mobileSections = document.getElementById('mobileSectionsCount');
             
             if (desktopPositions) desktopPositions.textContent = d.positions.toLocaleString();
             if (desktopCandidates) desktopCandidates.textContent = d.candidates.toLocaleString();
@@ -363,6 +368,7 @@ if (mobileMenuBtn && mobileMenu) {
             if (mobilePositions) mobilePositions.textContent = d.positions.toLocaleString();
             if (mobileCandidates) mobileCandidates.textContent = d.candidates.toLocaleString();
             if (mobilePartylists) mobilePartylists.textContent = d.partylists.toLocaleString();
+            if (mobileSections) mobileSections.textContent = (d.sections || 0).toLocaleString();
         });
     }
 
@@ -831,6 +837,171 @@ if (partylistSearch) {
         voteToggleSwitch = null;
         guestToggleSwitch = null;
         testToggleSwitch = null;
+    });
+
+    // ---- Sections (e.g. IT 101, IT 102) ----
+    var sectionsSearchTimer = null;
+    var selectedSections = new Set();
+
+    function updateSectionBulkBtn() {
+        var btn = document.getElementById('sectionBulkDelete');
+        if (!btn) return;
+        if (selectedSections.size > 0) { btn.classList.remove('hidden'); btn.textContent = 'Delete (' + selectedSections.size + ')'; }
+        else btn.classList.add('hidden');
+    }
+
+    function updateSectionSelectAll() {
+        var all = document.getElementById('sectionSelectAll');
+        if (!all) return;
+        var cbs = document.querySelectorAll('#sectionsTableBody .sec-check');
+        all.checked = cbs.length > 0 && Array.from(cbs).every(function(cb) { return cb.checked; });
+        updateSectionBulkBtn();
+    }
+    var sectionCanEdit = window.SSC.canEditInfo === true;
+
+    function initSortableSections() {
+        if (!sectionCanEdit) return;
+        var tbody = document.getElementById('sectionsTableBody');
+        if (!tbody) return;
+        if (sortableSections) { sortableSections.destroy(); sortableSections = null; }
+        setTimeout(function() {
+            sortableSections = new Sortable(tbody, {
+                animation: 150, ghostClass: 'sortable-ghost', delay: 400,
+                onEnd: function() {
+                    var updates = [];
+                    var rows = tbody.querySelectorAll('tr');
+                    for (var i = 0; i < rows.length; i++) {
+                        var btn = rows[i].querySelector('.sec-edit-btn');
+                        if (btn) updates.push({ id: btn.dataset.id, name: btn.dataset.name, sort_order: i + 1 });
+                    }
+                    for (var j = 0; j < updates.length; j++) {
+                        apiPost(appUrl + '/admin/api/sections', updates[j], function(d) {
+                            if (!d.success) showToast('Reorder failed', 'error');
+                        });
+                    }
+                }
+            });
+        }, 300);
+    }
+
+    function escSection(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
+    function loadSections() {
+        var search = document.getElementById('sectionSearch');
+        var q = search ? search.value.trim() : '';
+        apiGet(appUrl + '/admin/api/sections' + (q ? '?search=' + encodeURIComponent(q) : ''), function(d) {
+            if (!d.success) return;
+            var rows = d.data || [];
+            var cols = sectionCanEdit ? 3 : 1;
+            var h = '';
+            if (!rows.length) {
+                h = '<tr><td colspan="' + cols + '" class="px-4 py-8 text-center text-zinc-500">No sections yet.</td></tr>';
+            }
+            rows.forEach(function(s) {
+                h += '<tr class="border-b border-zinc-200/60 dark:border-zinc-800/60">';
+                if (sectionCanEdit) h += '<td class="px-4 py-3"><input type="checkbox" class="sec-check rounded" value="' + s.id + '" ' + (selectedSections.has(String(s.id)) ? 'checked' : '') + '></td>';
+                if (sectionCanEdit) h += '<td class="px-4 py-3 w-10"><span class="drag-handle cursor-grab text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 opacity-0 select-none w-4 h-4 inline-block"></span></td>';
+                h += '<td class="px-4 py-3 font-semibold text-zinc-900 dark:text-white">' + escSection(s.name) + '</td>';
+                if (sectionCanEdit) {
+                    h += '<td class="px-4 py-3"><div class="flex items-center gap-3">';
+                    h += '<button type="button" class="sec-edit-btn text-blue-600 hover:text-blue-500 text-sm font-semibold" data-id="' + s.id + '" data-name="' + escSection(s.name) + '" data-sort="' + (s.sort_order || 0) + '">Edit</button>';
+                    h += '<button type="button" class="sec-del-btn text-red-500 hover:text-red-400 text-sm font-semibold" data-id="' + s.id + '">Delete</button>';
+                    h += '</div></td>';
+                }
+                h += '</tr>';
+            });
+            var body = document.getElementById('sectionsTableBody');
+            if (!body) return;
+            body.innerHTML = safeHTML(h);
+            initSortableSections();
+            if (!sectionCanEdit) return;
+            body.querySelectorAll('.sec-check').forEach(function(cb) {
+                cb.addEventListener('change', function() {
+                    if (this.checked) selectedSections.add(this.value);
+                    else selectedSections.delete(this.value);
+                    updateSectionBulkBtn();
+                });
+            });
+            updateSectionSelectAll();
+            body.querySelectorAll('.sec-edit-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    openSectionModal(this.dataset.id, this.dataset.name);
+                });
+            });
+            body.querySelectorAll('.sec-del-btn').forEach(function(btn) {
+                btn.addEventListener('click', async function() {
+                    if (!await confirmDelete('Delete Section?', 'Delete this section?')) return;
+                    apiDelete(appUrl + '/admin/api/sections/delete', this.dataset.id, function(res) {
+                        if (res.success) { loadSections(); showToast(res.message); }
+                        else Swal.fire({ text: res.error, icon: 'error' });
+                    });
+                });
+            });
+        });
+    }
+
+    function openSectionModal(id, name) {
+        var modal = document.getElementById('sectionModal');
+        if (!modal) return;
+        document.getElementById('sectionId').value = id || '';
+        document.getElementById('sectionName').value = name || '';
+        document.getElementById('sectionModalTitle').textContent = id ? 'Edit Section' : 'Add Section';
+        modal.classList.remove('hidden');
+        setTimeout(function() { document.getElementById('sectionName').focus(); }, 50);
+    }
+
+    function closeSectionModal() {
+        var modal = document.getElementById('sectionModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function saveSection() {
+        var id = document.getElementById('sectionId').value;
+        var name = document.getElementById('sectionName').value.trim();
+        if (!name) { Swal.fire({ text: 'Section name is required', icon: 'error' }); return; }
+        apiPost(appUrl + '/admin/api/sections', { id: id, name: name }, function(d) {
+            if (d.success) { closeSectionModal(); loadSections(); showToast(d.message); }
+            else Swal.fire({ text: d.error, icon: 'error' });
+        });
+    }
+
+    var sectionSaveBtn = document.getElementById('sectionModalSave');
+    if (sectionSaveBtn) sectionSaveBtn.addEventListener('click', saveSection);
+    var sectionCancelBtn = document.getElementById('sectionModalCancel');
+    if (sectionCancelBtn) sectionCancelBtn.addEventListener('click', closeSectionModal);
+    var sectionBackdrop = document.getElementById('sectionModalBackdrop');
+    if (sectionBackdrop) sectionBackdrop.addEventListener('click', closeSectionModal);
+    var sectionSelectAllEl = document.getElementById('sectionSelectAll');
+    if (sectionSelectAllEl) sectionSelectAllEl.addEventListener('change', function() {
+        var checked = this.checked;
+        document.querySelectorAll('#sectionsTableBody .sec-check').forEach(function(cb) {
+            cb.checked = checked;
+            if (checked) selectedSections.add(cb.value); else selectedSections.delete(cb.value);
+        });
+        updateSectionBulkBtn();
+    });
+    var sectionBulkBtn = document.getElementById('sectionBulkDelete');
+    if (sectionBulkBtn) sectionBulkBtn.addEventListener('click', async function() {
+        var count = selectedSections.size;
+        if (!count) return;
+        if (!await confirmDelete('Delete?', 'Delete ' + count + ' section' + (count === 1 ? '' : 's') + '?')) return;
+        apiPost(appUrl + '/admin/api/sections/bulk-delete', { ids: JSON.stringify(Array.from(selectedSections)) }, function(d) {
+            if (d.success) {
+                selectedSections.clear();
+                loadSections(); refreshStats(); showToast(d.message);
+            } else {
+                Swal.fire({ text: d.error || 'Delete failed', icon: 'error' });
+            }
+        });
+    });
+    var sectionSearchEl = document.getElementById('sectionSearch');
+    if (sectionSearchEl) sectionSearchEl.addEventListener('input', function() {
+        clearTimeout(sectionsSearchTimer);
+        sectionsSearchTimer = setTimeout(loadSections, 300);
     });
 
     refreshStats();

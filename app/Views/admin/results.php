@@ -72,6 +72,11 @@ $extraMobileContent = '';
                     <div class="card-interactive group"><p class="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Total Votes</p><p class="text-4xl font-black tracking-[-0.04em] text-zinc-900 dark:text-white mt-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300" id="totalVotes">-</p></div>
                 </div>
 
+                <div id="sectionTotalsCard" class="card mb-4 sm:mb-6 hidden">
+                    <h3 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-white mb-3">Votes per Section</h3>
+                    <div id="sectionTotalsList" class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+                </div>
+
                 <div id="resultsContainer" class="space-y-4 sm:space-y-6">
                     <div class="card text-center py-12"><p class="text-zinc-500">Loading results...</p></div>
                 </div>

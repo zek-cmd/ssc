@@ -58,6 +58,7 @@ class ApiController extends Controller {
             'positions' => (int)$pdo->query("SELECT COUNT(*) FROM positions")->fetchColumn(),
             'candidates' => (int)$pdo->query("SELECT COUNT(*) FROM candidates")->fetchColumn(),
             'partylists' => (int)$pdo->query("SELECT COUNT(*) FROM partylists")->fetchColumn(),
+            'sections' => (int)$pdo->query("SELECT COUNT(*) FROM sections")->fetchColumn(),
         ]);
     }
 

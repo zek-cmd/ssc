@@ -163,7 +163,22 @@ CREATE TABLE `votes` (
   `voter_identifier` varchar(16) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Unique voter identifier',
   `voter_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `email` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `voted_at` datetime DEFAULT CURRENT_TIMESTAMP
+  `voted_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `section_id` int DEFAULT NULL COMMENT 'Section the voter picked (NULL for older votes)'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sections`
+--
+
+CREATE TABLE `sections` (
+  `id` int NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `sort_order` int DEFAULT '0',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -235,6 +250,14 @@ INSERT INTO `votingswitch` (`enable_vote`, `enable_login`, `enable_guest`, `enab
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `sections`
+--
+ALTER TABLE `sections`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uniq_section_name` (`name`),
+  ADD KEY `idx_sections_sort_order` (`sort_order`);
 
 --
 -- Indexes for table `audit_logs`
@@ -318,7 +341,8 @@ ALTER TABLE `votes`
   ADD KEY `idx_voter_identifier` (`voter_identifier`),
   ADD KEY `idx_voter_exists` (`voter_identifier`),
   ADD KEY `idx_voted_at_email` (`voted_at`,`email`),
-  ADD KEY `idx_voted_at_identifier` (`voted_at`,`voter_identifier`);
+  ADD KEY `idx_voted_at_identifier` (`voted_at`,`voter_identifier`),
+  ADD KEY `idx_votes_section_id` (`section_id`);
 
 --
 -- Indexes for table `vote_counts`
@@ -380,6 +404,12 @@ ALTER TABLE `security_events`
 --
 ALTER TABLE `users`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `sections`
+--
+ALTER TABLE `sections`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `votes`

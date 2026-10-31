@@ -17,9 +17,9 @@
             window.location.href = window.SSC.appUrl + '/?message=session_expired';
         }
         
-        function pingSession() {
+        function pingSession(force) {
             if (!window.SSC.isAuthenticated) return;
-            if (!isTabActive) return;
+            if (!force && !isTabActive) return;
             var formData = new FormData();
             formData.append('csrf_token', window.SSC.csrfToken);
             fetch(window.SSC.appUrl + '/heartbeat', {
@@ -65,6 +65,7 @@
         
         resetTimer();
         pingInterval = setInterval(pingSession, PING_INTERVAL);
+        pingSession(true); // heartbeat on every page load / navigation
     }
     
     if (!document.documentElement.classList.contains('assets-cached')) {

@@ -30,9 +30,11 @@
         });
     }
     
-    function pingSession() {
+    window.SSC_ping = function() { pingSession(true); };
+
+    function pingSession(force) {
         if (!window.SSC.isAuthenticated) return;
-        if (!isTabActive) return;
+        if (!force && !isTabActive) return;
         var formData = new FormData();
         formData.append('csrf_token', window.SSC.csrfToken);
         fetch(window.SSC.appUrl + '/admin/heartbeat', {
@@ -79,6 +81,7 @@
     if (window.SSC.isAuthenticated) {
         resetTimer();
         pingInterval = setInterval(pingSession, PING_INTERVAL);
+        pingSession(true); // heartbeat on every page load / navigation
     }
     
     if (!document.documentElement.classList.contains('assets-cached')) {

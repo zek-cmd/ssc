@@ -677,6 +677,7 @@
 
                 var tv = document.getElementById('totalVotes');
                 if (tv) tv.textContent = resultsHidden ? '******' : (data.total_votes || 0).toLocaleString();
+                renderSectionTotals(data.section_totals || []);
                 var lu = document.getElementById('lastUpdated');
                 if (lu) lu.textContent = 'Updated: ' + (data.generated_at || '');
 
@@ -994,7 +995,10 @@
 
     function startAutoRefresh() {
         stopAutoRefresh();
-        refreshInterval = setInterval(loadResults, 60000);
+        refreshInterval = setInterval(function() {
+            if (typeof window.SSC_ping === 'function') window.SSC_ping();
+            loadResults();
+        }, 60000);
     }
 
     function stopAutoRefresh() {
@@ -1005,6 +1009,7 @@
         autoRefresh = !autoRefresh;
         syncToggleText();
         if (autoRefresh) {
+            if (typeof window.SSC_ping === 'function') window.SSC_ping();
             loadResults();
             startAutoRefresh();
         } else {
@@ -1085,6 +1090,31 @@
             if (typeof Swal !== 'undefined') Swal.fire({ text: 'Network error. Please try again.', icon: 'error' });
             else alert('Network error. Please try again.');
         });
+    }
+
+    function renderSectionTotals(rows) {
+        var card = document.getElementById('sectionTotalsCard');
+        var list = document.getElementById('sectionTotalsList');
+        if (!card || !list) return;
+        if (!rows.length) {
+            card.classList.add('hidden');
+            return;
+        }
+        card.classList.remove('hidden');
+        list.innerHTML = '';
+        for (var i = 0; i < rows.length; i++) {
+            var item = document.createElement('div');
+            item.className = 'rounded-2xl ring-1 ring-zinc-200 dark:ring-zinc-700 p-3 sm:p-4 bg-zinc-50 dark:bg-zinc-800/60';
+            var label = document.createElement('p');
+            label.className = 'text-xs sm:text-sm font-semibold text-zinc-500 dark:text-zinc-400 truncate';
+            label.textContent = rows[i].name;
+            var count = document.createElement('p');
+            count.className = 'text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white';
+            count.textContent = resultsHidden ? '******' : (rows[i].total_votes || 0).toLocaleString();
+            item.appendChild(label);
+            item.appendChild(count);
+            list.appendChild(item);
+        }
     }
 
     // ===== APP INIT =====

@@ -49,6 +49,7 @@ class DashboardController extends Controller {
         $positionsCount = $pdo->query("SELECT COUNT(*) FROM positions")->fetchColumn();
         $candidatesCount = $pdo->query("SELECT COUNT(*) FROM candidates")->fetchColumn();
         $partylistsCount = $pdo->query("SELECT COUNT(*) FROM partylists")->fetchColumn();
+$sectionsCount = $pdo->query("SELECT COUNT(*) FROM sections")->fetchColumn();
         
         $title = APP_NAME . ' - Admin Dashboard';
         

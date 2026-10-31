@@ -66,6 +66,25 @@
                             </div>
 
                             <div class="card">
+                                <label for="sectionSelect" class="block text-sm sm:text-lg font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
+                                    Section
+                                </label>
+                                <div class="relative">
+                                    <input type="text" id="sectionInput" readonly placeholder="Tap to pick your section (e.g. IT 101)" autocomplete="off" role="combobox" aria-haspopup="dialog" aria-expanded="false" class="input-field cursor-pointer relative bg-transparent pr-10 text-sm sm:text-lg">
+                                    <button type="button" id="sectionToggle" aria-label="Show sections" class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-500 dark:text-zinc-400">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </button>
+                                </div>
+                                <p id="sectionWarning" class="hidden mt-2 text-sm sm:text-lg font-semibold text-red-600 dark:text-red-400">Invalid section name</p>
+                                <datalist id="sectionList">
+<?php foreach ($sections as $sec): ?>
+                                    <option value="<?= htmlspecialchars($sec['name']) ?>" data-id="<?= (int)$sec['id'] ?>"></option>
+<?php endforeach; ?>
+                                </datalist>
+                                <input type="hidden" id="sectionSelect" name="section_id" value="">
+                            </div>
+
+                            <div class="card">
                                 <label for="emailInput" class="block text-sm sm:text-lg font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
                                     Email Address
                                 </label>
@@ -110,6 +129,24 @@
             </div>
 
        
+            <div id="sectionModal" class="fixed inset-0 z-[60] hidden flex items-end sm:items-center justify-center sm:p-4">
+                <div id="sectionModalBackdrop" class="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm"></div>
+                <div class="relative flex flex-col w-full sm:max-w-md max-h-[85dvh] min-h-0 bg-white dark:bg-zinc-900 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
+                    <div class="flex items-center justify-between px-5 py-3 border-b border-zinc-200/60 dark:border-zinc-800/60 shrink-0">
+                        <h3 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-white">Select your Section</h3>
+                        <button type="button" id="sectionModalClose" aria-label="Close" class="p-1.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-300">
+                            <svg class="w-5 h-5 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <div class="relative px-5 pt-3 shrink-0">
+                        <div id="sectionModalGhost" aria-hidden="true" class="input-field pointer-events-none absolute inset-x-5 top-3 overflow-hidden whitespace-pre text-sm sm:text-base"><span id="sectionModalGhostTyped" class="text-transparent"></span><span id="sectionModalGhostRest" class="text-zinc-400 dark:text-zinc-500"></span></div>
+                        <input type="search" id="sectionModalSearch" placeholder="Type to search (e.g. IT 101)" autocomplete="off" class="input-field relative bg-transparent text-sm sm:text-base">
+                    </div>
+                    <div id="sectionModalList" role="listbox" class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 py-2"></div>
+                    <p id="sectionModalEmpty" class="hidden px-5 pb-4 text-sm text-zinc-500">No section found</p>
+                </div>
+            </div>
+
             <div id="viewSelectionsModal" class="fixed inset-0 z-50 hidden">
                 <div id="viewSelectionsBackdrop" class="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm"></div>
                 <div class="absolute inset-0 w-full h-full bg-white dark:bg-zinc-900 flex flex-col">
