@@ -161,7 +161,7 @@ class ResultsController extends Controller {
     
     $output = fopen($filepath, 'w');
     
-    $headers = ['Voter ID', 'Name', 'Email', 'Voted At'];
+    $headers = ['Voter ID', 'Name', 'Section', 'Email', 'Voted At'];
     foreach ($positions as $pos) {
         $headers[] = $pos['name'];
     }
@@ -193,8 +193,9 @@ class ResultsController extends Controller {
     
     while (true) {
         $stmt = $pdo->prepare("
-            SELECT v.id, v.voter_identifier, v.voter_name, v.email, v.voted_at
+            SELECT v.id, v.voter_identifier, v.voter_name, v.email, v.voted_at, s.name AS section_name
             FROM votes v
+            LEFT JOIN sections s ON s.id = v.section_id
             ORDER BY v.voted_at ASC
             LIMIT ? OFFSET ?
         ");
@@ -225,6 +226,7 @@ class ResultsController extends Controller {
             $row = [
                 $vote['voter_identifier'],
                 $vote['voter_name'] ?? '',
+                $vote['section_name'] ?? '',
                 $vote['email'] ?? '',
                 "'" . date('F j, Y g:i A', strtotime($vote['voted_at']))
             ];
