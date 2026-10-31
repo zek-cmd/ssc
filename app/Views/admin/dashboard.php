@@ -37,7 +37,7 @@ if (isset($canManageVote) && $canManageVote) {
 }
 
 // Sections button in the desktop sidebar (the mobile bottom menu already has one)
-$extraSidebarNavHtml = '<button type="button" data-action="switch-section" data-section="sections" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-2xl text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-300 sidebar-expanded-item"><svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg><span class="sidebar-label">Sections</span></button>' . $extraSidebarNavHtml;
+$extraSidebarNavHtml = '';
 
 $mobileNavItems = $sidebarNavItems;
 ?>
