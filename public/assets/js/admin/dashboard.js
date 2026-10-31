@@ -3,7 +3,7 @@
     var appUrl = window.SSC.appUrl;
     var isSuperAdmin = window.SSC.isSuperAdmin === true;
     var canEditInfo = window.SSC.canEditInfo === true;
-    var pages = { positions: 1, candidates: 1, partylists: 1 };
+    var pages = { positions: 1, candidates: 1, partylists: 1, sections: 1 };
     var limits = { positions: 12, candidates: 12, partylists: 12 };
     var selected = { positions: new Set(), candidates: new Set(), partylists: new Set() };
     var sortablePositions = null, sortablePartylists = null, sortableSections = null;
@@ -871,9 +871,10 @@ if (partylistSearch) {
                 onEnd: function() {
                     var updates = [];
                     var rows = tbody.querySelectorAll('tr');
+                    var offset = (pages.sections - 1) * PAGE_TARGET;
                     for (var i = 0; i < rows.length; i++) {
                         var btn = rows[i].querySelector('.sec-edit-btn');
-                        if (btn) updates.push({ id: btn.dataset.id, name: btn.dataset.name, sort_order: i + 1 });
+                        if (btn) updates.push({ id: btn.dataset.id, name: btn.dataset.name, sort_order: offset + i + 1 });
                     }
                     for (var j = 0; j < updates.length; j++) {
                         apiPost(appUrl + '/admin/api/sections', updates[j], function(d) {
@@ -891,12 +892,16 @@ if (partylistSearch) {
         });
     }
 
-    function loadSections() {
+    function loadSections(page) {
+        page = page || 1; pages.sections = page;
         var search = document.getElementById('sectionSearch');
         var q = search ? search.value.trim() : '';
-        apiGet(appUrl + '/admin/api/sections' + (q ? '?search=' + encodeURIComponent(q) : ''), function(d) {
+        var params = '?page=' + page + '&target=' + PAGE_TARGET;
+        if (q) params += '&search=' + encodeURIComponent(q);
+        apiGet(appUrl + '/admin/api/sections' + params, function(d) {
             if (!d.success) return;
             var rows = d.data || [];
+            renderPagination('sectionsInfo', 'sectionsPages', d, loadSections);
             var cols = sectionCanEdit ? 3 : 1;
             var h = '';
             if (!rows.length) {
@@ -972,6 +977,10 @@ if (partylistSearch) {
 
     var sectionSaveBtn = document.getElementById('sectionModalSave');
     if (sectionSaveBtn) sectionSaveBtn.addEventListener('click', saveSection);
+    var sectionNameInput = document.getElementById('sectionName');
+    if (sectionNameInput) sectionNameInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); saveSection(); }
+    });
     var sectionCancelBtn = document.getElementById('sectionModalCancel');
     if (sectionCancelBtn) sectionCancelBtn.addEventListener('click', closeSectionModal);
     var sectionBackdrop = document.getElementById('sectionModalBackdrop');

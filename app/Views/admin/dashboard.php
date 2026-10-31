@@ -88,6 +88,10 @@ $mobileNavItems = $sidebarNavItems;
                         <div class="card">
                             <div class="flex flex-col sm:flex-row gap-3 mb-4"><div class="flex-1 w-full"><input type="search" id="sectionSearch" placeholder="Search sections..." autocomplete="off" class="input-field w-full"></div><?php if ($canEditInfo): ?><button type="button" id="sectionBulkDelete" class="btn-secondary text-sm hidden w-full sm:w-auto">Delete (0)</button><?php endif; ?></div>
                             <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-zinc-200/60 dark:border-zinc-800/60"><?php if ($canEditInfo): ?><th class="px-4 py-3 text-left"><input type="checkbox" id="sectionSelectAll" class="rounded"></th><th class="px-4 py-3 text-left font-semibold text-zinc-500 dark:text-zinc-400 w-10"></th><?php endif; ?><th class="px-4 py-3 text-left font-semibold text-zinc-500 dark:text-zinc-400">Section</th><?php if ($canEditInfo): ?><th class="px-4 py-3 text-left font-semibold text-zinc-500 dark:text-zinc-400">Actions</th><?php endif; ?></tr></thead><tbody id="sectionsTableBody"><tr><td colspan="4" class="px-4 py-8 text-center text-zinc-500">Loading...</td></tr></tbody></table></div>
+                            <div class="flex flex-col items-start mt-4 pt-4 border-t border-zinc-200/60 dark:border-zinc-800/60 gap-2">
+                                <p class="text-sm text-zinc-500 dark:text-zinc-400" id="sectionsInfo"></p>
+                                <div class="flex gap-2 flex-wrap" id="sectionsPages"></div>
+                            </div>
                         </div>
                     </div>
                     <div id="positionsSection" class="section-panel hidden">

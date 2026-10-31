@@ -211,6 +211,11 @@
             countSpans[j].textContent = '******';
         }
 
+        var sectionCounts = document.querySelectorAll('#sectionTotalsList p.text-xl');
+        for (var sc = 0; sc < sectionCounts.length; sc++) {
+            sectionCounts[sc].textContent = '******';
+        }
+
         var winningBadges = document.querySelectorAll('[data-winning-badge]');
         for (var wb = 0; wb < winningBadges.length; wb++) {
             winningBadges[wb].parentElement.removeChild(winningBadges[wb]);
@@ -232,6 +237,7 @@
 
     function unmaskAllResults() {
         if (!latestData) return;
+        if (latestData.section_totals) renderSectionTotals(latestData.section_totals);
 
         var totalVotesEl = document.getElementById('totalVotes');
         if (totalVotesEl && latestData.total_votes !== undefined) {

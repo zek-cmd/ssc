@@ -25,9 +25,11 @@ class SectionController extends Controller {
 
     // List all sections (used by the dashboard table and the voting page)
     public function getSections() {
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $limit = min(30, max(5, (int)($_GET['target'] ?? 12)));
         $search = trim($_GET['search'] ?? '');
-        $rows = (new Section())->getAll($search);
-        return $this->json(['success' => true, 'data' => $rows]);
+        $result = (new Section())->getPage($page, $limit, $search);
+        return $this->json(['success' => true, 'limit' => $limit, ...$result]);
     }
 
     public function saveSection() {
