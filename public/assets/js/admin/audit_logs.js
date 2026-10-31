@@ -438,9 +438,11 @@ function openAuditDetailModal(logId) {
                     h += '<td class="cell-desktop px-4 py-3 text-zinc-600 dark:text-zinc-400 text-xs"><span class="block truncate">' + (log.description || '-') + '</span></td>';
                     h += '<td class="cell-desktop px-4 py-3 text-xs text-zinc-400 dark:text-zinc-500 whitespace-nowrap">' + (log.ip_address || '-') + '</td>';
                     h += '<td class="cell-mobile px-4 py-3" colspan="6"><div class="space-y-2 mobile-card-fixed">';
-                    h += '<div class="flex items-center justify-between min-w-0"><span class="font-semibold text-zinc-900 dark:text-white text-sm truncate">' + (log.admin_name || 'Unknown') + '</span>' + getActionBadge(log.action) + '</div>';
-                    h += '<p class="text-xs text-zinc-500 truncate">' + (log.entity_type || '-') + ' - ' + (log.description || '-') + '</p>';
-                    h += '<div class="flex items-center justify-between text-xs text-zinc-400 dark:text-zinc-500"><span class="truncate">' + createdAt + '</span><span class="truncate">IP: ' + (log.ip_address || '-') + '</span></div></td></tr>';
+                    h += '<p class="font-semibold text-zinc-900 dark:text-white text-sm break-words">' + (log.admin_name || 'Unknown') + '</p>';
+                    h += '<div>' + getActionBadge(log.action) + '</div>';
+                    h += '<p class="text-xs text-zinc-500 break-words">' + (log.entity_type || '-') + ' - ' + (log.description || '-') + '</p>';
+                    h += '<p class="text-xs text-zinc-400 dark:text-zinc-500 break-words">' + createdAt + '</p>';
+                    h += '<p class="text-xs text-zinc-400 dark:text-zinc-500 break-words">IP: ' + (log.ip_address || '-') + '</p></div></td></tr>';
                 }
             }
             document.getElementById('logsTableBody').innerHTML = safeHTML(h);

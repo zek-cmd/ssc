@@ -171,9 +171,11 @@ function getEventBadge(eventType) {
                     h += '<td class="cell-desktop px-4 py-3 text-xs text-zinc-400 dark:text-zinc-500 whitespace-nowrap">' + (event.ip_address || '-') + '</td>';
                     
                     h += '<td class="cell-mobile px-4 py-3" colspan="5"><div class="space-y-2 mobile-card-fixed">';
-                    h += '<div class="flex items-center justify-between min-w-0"><span class="font-semibold text-zinc-900 dark:text-white text-sm truncate">' + (event.admin_name || 'System') + '</span>' + getEventBadge(event.event_type) + '</div>';
-                    h += '<p class="text-xs text-zinc-500 dark:text-zinc-400 truncate">' + (event.description || '-') + '</p>';
-                    h += '<div class="flex items-center justify-between text-xs text-zinc-400 dark:text-zinc-500"><span class="truncate">' + createdAt + '</span><span class="truncate">IP: ' + (event.ip_address || '-') + '</span></div>';
+                    h += '<p class="font-semibold text-zinc-900 dark:text-white text-sm break-words">' + (event.admin_name || 'System') + '</p>';
+                    h += '<div>' + getEventBadge(event.event_type) + '</div>';
+                    h += '<p class="text-xs text-zinc-500 dark:text-zinc-400 break-words">' + (event.description || '-') + '</p>';
+                    h += '<p class="text-xs text-zinc-400 dark:text-zinc-500 break-words">' + createdAt + '</p>';
+                    h += '<p class="text-xs text-zinc-400 dark:text-zinc-500 break-words">IP: ' + (event.ip_address || '-') + '</p>';
                     h += '</div></td></tr>';
                 }
             }
