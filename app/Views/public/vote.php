@@ -54,8 +54,8 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
 
 <?php if (!$isTestVote): ?>
-                        <div class="flex flex-col gap-4 sm:gap-6">
-                            <div class="card">
+                        <div class="card flex flex-col gap-5 sm:gap-6">
+                            <div>
                                 <label for="nameInput" class="block text-sm sm:text-lg font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
                                     Full Name
                                 </label>
@@ -65,7 +65,7 @@
                                        autocomplete="off">
                             </div>
 
-                            <div class="card">
+                            <div>
                                 <label for="sectionSelect" class="block text-sm sm:text-lg font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
                                     Section
                                 </label>
@@ -84,7 +84,7 @@
                                 <input type="hidden" id="sectionSelect" name="section_id" value="">
                             </div>
 
-                            <div class="card">
+                            <div>
                                 <label for="emailInput" class="block text-sm sm:text-lg font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
                                     Email Address
                                 </label>
@@ -129,21 +129,22 @@
             </div>
 
        
-            <div id="sectionModal" class="fixed inset-0 z-[60] hidden flex items-end sm:items-center justify-center sm:p-4">
+            <div id="sectionModal" class="fixed inset-0 z-[60] hidden">
                 <div id="sectionModalBackdrop" class="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm"></div>
-                <div class="relative flex flex-col w-full sm:max-w-md max-h-[85dvh] min-h-0 bg-white dark:bg-zinc-900 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
-                    <div class="flex items-center justify-between px-5 py-3 border-b border-zinc-200/60 dark:border-zinc-800/60 shrink-0">
-                        <h3 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-white">Select your Section</h3>
-                        <button type="button" id="sectionModalClose" aria-label="Close" class="p-1.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-300">
-                            <svg class="w-5 h-5 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    </div>
-                    <div class="relative px-5 pt-3 shrink-0">
-                        <div id="sectionModalGhost" aria-hidden="true" class="input-field pointer-events-none absolute inset-x-5 top-3 overflow-hidden whitespace-pre text-sm sm:text-base"><span id="sectionModalGhostTyped" class="text-transparent"></span><span id="sectionModalGhostRest" class="text-zinc-400 dark:text-zinc-500"></span></div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] sm:max-w-md max-h-[85dvh] flex flex-col bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl ring-1 ring-zinc-200 dark:ring-zinc-800 p-6 space-y-4">
+                    <h3 class="text-lg font-bold text-zinc-900 dark:text-white">Select your Section</h3>
+                    <div>
+                    <label for="sectionModalSearch" class="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Section</label>
+                    <div class="relative">
+                        <div id="sectionModalGhost" aria-hidden="true" class="input-field pointer-events-none absolute inset-x-0 top-0 overflow-hidden whitespace-pre text-sm sm:text-base"><span id="sectionModalGhostTyped" class="text-transparent"></span><span id="sectionModalGhostRest" class="text-zinc-400 dark:text-zinc-500"></span></div>
                         <input type="search" id="sectionModalSearch" placeholder="Type to search (e.g. IT 101)" autocomplete="off" class="input-field relative bg-transparent text-sm sm:text-base">
                     </div>
-                    <div id="sectionModalList" role="listbox" class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 py-2"></div>
-                    <p id="sectionModalEmpty" class="hidden px-5 pb-4 text-sm text-zinc-500">No section found</p>
+                    </div>
+                    <div id="sectionModalList" role="listbox" class="flex-1 min-h-0 overflow-y-auto overscroll-contain rounded-2xl"></div>
+                    <p id="sectionModalEmpty" class="hidden text-sm text-zinc-500">No section found</p>
+                    <div class="flex justify-end gap-2 pt-2 shrink-0">
+                        <button type="button" id="sectionModalOk" class="px-4 py-2 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold">OK</button>
+                    </div>
                 </div>
             </div>
 

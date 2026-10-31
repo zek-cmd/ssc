@@ -207,13 +207,76 @@
     });
 });
 
+    function openAddForCurrentSection() {
+        if (currentSection === 'positions') openPositionModal();
+        else if (currentSection === 'candidates') openCandidateModal();
+        else if (currentSection === 'partylists') openPartylistModal();
+        else if (currentSection === 'sections') openSectionModal();
+    }
+
     if (dynamicAddBtn) {
-        dynamicAddBtn.addEventListener('click', function() {
-            if (currentSection === 'positions') openPositionModal();
-            else if (currentSection === 'candidates') openCandidateModal();
-            else if (currentSection === 'partylists') openPartylistModal();
-            else if (currentSection === 'sections') openSectionModal();
-        });
+        dynamicAddBtn.addEventListener('click', openAddForCurrentSection);
+    }
+
+    // Shift + "+" opens the add modal (ignored while typing in a field)
+    document.addEventListener('keydown', function(e) {
+        var tag = (e.target && e.target.tagName) || '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target && e.target.isContentEditable)) return;
+        if (e.key !== '+' && !(e.shiftKey && e.code === 'Equal')) return;
+        if (!canEditInfo || (dynamicAddBtn && dynamicAddBtn.classList.contains('hidden'))) return;
+        e.preventDefault();
+        openAddForCurrentSection();
+        focusFirstFieldInOpenModal();
+    });
+
+    // Shift + S saves the add/edit box that is open
+    document.addEventListener('keydown', function(e) {
+        if (!(e.shiftKey && (e.key === 'S' || e.key === 's'))) return;
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        var modalForms = [
+            { modal: 'positionModal', form: 'positionForm' },
+            { modal: 'candidateModal', form: 'candidateForm' },
+            { modal: 'partylistModal', form: 'partylistForm' }
+        ];
+        for (var i = 0; i < modalForms.length; i++) {
+            var m = document.getElementById(modalForms[i].modal);
+            if (m && !m.classList.contains('hidden')) {
+                var f = document.getElementById(modalForms[i].form);
+                if (f) { e.preventDefault(); f.requestSubmit ? f.requestSubmit() : f.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })); }
+                return;
+            }
+        }
+        var sectionModal = document.getElementById('sectionModal');
+        if (sectionModal && !sectionModal.classList.contains('hidden')) {
+            e.preventDefault();
+            saveSection();
+        }
+    });
+
+    // Esc closes the add/edit box that is open
+    document.addEventListener('keydown', function(e) {
+        if (e.key !== 'Escape') return;
+        var modalIds = ['positionModal', 'candidateModal', 'sectionModal', 'partylistModal'];
+        for (var i = 0; i < modalIds.length; i++) {
+            var modal = document.getElementById(modalIds[i]);
+            if (modal && !modal.classList.contains('hidden')) {
+                modal.classList.add('hidden');
+                e.preventDefault();
+                return;
+            }
+        }
+    });
+
+    // Puts the cursor in the first input box of the add modal that is open
+    function focusFirstFieldInOpenModal() {
+        var modalIds = ['positionModal', 'candidateModal', 'sectionModal', 'partylistModal'];
+        for (var i = 0; i < modalIds.length; i++) {
+            var modal = document.getElementById(modalIds[i]);
+            if (!modal || modal.classList.contains('hidden')) continue;
+            var field = modal.querySelector('input:not([type="hidden"]):not([readonly]):not([disabled]), textarea:not([readonly]):not([disabled]), select:not([disabled])');
+            if (field) field.focus();
+            return;
+        }
     }
 
 mobileMenuBtn = document.getElementById('mobileMenuBtn');
@@ -345,6 +408,13 @@ if (mobileMenuBtn && mobileMenu) {
     }
     
     function showToast(msg, icon) { Swal.fire({ text: msg, icon: icon || 'success', timer: 1500, showConfirmButton: false }); }
+    window.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && typeof Swal !== 'undefined' && Swal.isVisible()) {
+            e.preventDefault();
+            e.stopPropagation();
+            Swal.close();
+        }
+    }, true);
     
     async function confirmDelete(title, text) {
         var result = await Swal.fire({ title: title, text: text, icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', confirmButtonText: 'Delete' });
@@ -362,6 +432,7 @@ if (mobileMenuBtn && mobileMenu) {
             var mobileCandidates = document.getElementById('mobileCandidatesCount');
             var mobilePartylists = document.getElementById('mobilePartylistsCount');
             var mobileSections = document.getElementById('mobileSectionsCount');
+            var desktopSections = document.getElementById('statSectionsCount');
             
             if (desktopPositions) desktopPositions.textContent = d.positions.toLocaleString();
             if (desktopCandidates) desktopCandidates.textContent = d.candidates.toLocaleString();
@@ -370,6 +441,7 @@ if (mobileMenuBtn && mobileMenu) {
             if (mobileCandidates) mobileCandidates.textContent = d.candidates.toLocaleString();
             if (mobilePartylists) mobilePartylists.textContent = d.partylists.toLocaleString();
             if (mobileSections) mobileSections.textContent = (d.sections || 0).toLocaleString();
+            if (desktopSections) desktopSections.textContent = (d.sections || 0).toLocaleString();
         });
     }
 
@@ -953,7 +1025,7 @@ if (partylistSearch) {
                 btn.addEventListener('click', async function() {
                     if (!await confirmDelete('Delete Section?', 'Delete this section?')) return;
                     apiDelete(appUrl + '/admin/api/sections/delete', this.dataset.id, function(res) {
-                        if (res.success) { loadSections(); showToast(res.message); }
+                        if (res.success) { loadSections(); refreshStats(); showToast(res.message); }
                         else Swal.fire({ text: res.error, icon: 'error' });
                     });
                 });
@@ -979,10 +1051,10 @@ if (partylistSearch) {
     function saveSection() {
         var id = document.getElementById('sectionId').value;
         var name = document.getElementById('sectionName').value.trim();
-        if (!name) { Swal.fire({ text: 'Section name is required', icon: 'error' }); return; }
+        if (!name) { Swal.fire({ text: 'Section name is required', icon: 'warning' }); return; }
         apiPost(appUrl + '/admin/api/sections', { id: id, name: name }, function(d) {
-            if (d.success) { closeSectionModal(); loadSections(); showToast(d.message); }
-            else Swal.fire({ text: d.error, icon: 'error' });
+            if (d.success) { closeSectionModal(); loadSections(); refreshStats(); showToast(d.message); }
+            else Swal.fire({ text: d.error || 'Save failed', icon: 'error' });
         });
     }
 

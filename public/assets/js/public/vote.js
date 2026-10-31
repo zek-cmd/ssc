@@ -17,7 +17,7 @@
         var toggle = document.getElementById('sectionToggle');
         var modal = document.getElementById('sectionModal');
         var backdrop = document.getElementById('sectionModalBackdrop');
-        var closeBtn = document.getElementById('sectionModalClose');
+        var closeBtn = document.getElementById('sectionModalOk');
         var search = document.getElementById('sectionModalSearch');
         var modalList = document.getElementById('sectionModalList');
         var modalEmpty = document.getElementById('sectionModalEmpty');
@@ -631,6 +631,12 @@
     function openViewSelectionsModal() {
         if (!viewSelectionsModal || !viewSelectionsContent) return;
         
+        function esc(s) {
+            return String(s).replace(/[&<>"']/g, function(c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+        }
+
         var html = '';
         for (var j = 0; j < positionOrder.length; j++) {
             var positionId = positionOrder[j];
