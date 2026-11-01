@@ -1311,6 +1311,9 @@
   .opacity-60 {
     opacity: 60%;
   }
+  .opacity-70 {
+    opacity: 70%;
+  }
   .opacity-100 {
     opacity: 100%;
   }
@@ -1507,6 +1510,9 @@
     .hover\:bg-red-100:hover {
       background-color: var(--color-red-100);
     }
+    .hover\:bg-white:hover {
+      background-color: var(--color-white);
+    }
     .hover\:bg-zinc-50:hover {
       background-color: var(--color-zinc-50);
     }
@@ -1547,6 +1553,14 @@
     @supports (color: color-mix(in lab, red, red)) {
       .hover\:shadow-zinc-200\/50:hover {
         --tw-shadow-color: color-mix(in oklab, color-mix(in oklab, var(--color-zinc-200) 50%, transparent) var(--tw-shadow-alpha), transparent);
+      }
+    }
+    .hover\:ring-blue-500\/50:hover {
+      --tw-ring-color: color-mix(in srgb, oklch(62.3% 0.214 259.815) 50%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:ring-blue-500\/50:hover {
+        --tw-ring-color: color-mix(in oklab, var(--color-blue-500) 50%, transparent);
       }
     }
   }

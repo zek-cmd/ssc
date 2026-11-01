@@ -173,6 +173,10 @@ return [
     ],
 
     // Vote Lookup (sidebar search)
+    'GET /admin/api/votes/sections' => [
+        'handler' => ['Admin\ResultsController', 'sectionVoterCounts'],
+        'middleware' => ['Admin\AuthMiddleware'],
+    ],
     'GET /admin/api/votes/search' => [
         'handler' => ['Admin\ResultsController', 'searchVotes'],
         'middleware' => ['Admin\AuthMiddleware']

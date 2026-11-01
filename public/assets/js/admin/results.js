@@ -37,6 +37,8 @@
     var voteLookupBackBtn = null, voteLookupModalTitle = null;
     var lookupSearchTimeout = null;
     var lookupPreviousView = null;
+    var lookupTabName = null, lookupTabSection = null, lookupPanelName = null, lookupPanelSection = null, lookupSectionSelect = null;
+    var lookupSectionsLoaded = false;
 
     // ===== COLLAPSED SIDEBAR =====
     var toggleRefreshCollapsed = null, exportCSVBtnCollapsed = null, deleteElectionDataCollapsed = null;
@@ -200,6 +202,7 @@
     function maskAllResults() {
         var totalVotesEl = document.getElementById('totalVotes');
         if (totalVotesEl) totalVotesEl.textContent = '******';
+        if (latestData && latestData.section_totals) renderSectionTotals(latestData.section_totals);
 
         var posWinSpans = document.querySelectorAll('[data-position-winning]');
         for (var pw = 0; pw < posWinSpans.length; pw++) {
@@ -422,12 +425,107 @@
     }
 
     // ===== VOTE LOOKUP =====
+    function setLookupTab(tab) {
+        var isName = tab === 'name';
+        if (lookupPanelName) lookupPanelName.classList.toggle('hidden', !isName);
+        if (lookupPanelSection) lookupPanelSection.classList.toggle('hidden', isName);
+        var active = 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm';
+        var idle = 'text-zinc-500 dark:text-zinc-400';
+        if (lookupTabName) lookupTabName.className = lookupTabName.className.replace(active, '').replace(idle, '') + ' ' + (isName ? active : idle);
+        if (lookupTabSection) lookupTabSection.className = lookupTabSection.className.replace(active, '').replace(idle, '') + ' ' + (isName ? idle : active);
+        if (!isName) {
+            if (lookupSearchTimeout) { clearTimeout(lookupSearchTimeout); lookupSearchTimeout = null; }
+            loadSectionOptions();
+        }
+        if (voteLookupResults) voteLookupResults.innerHTML = '<p class="text-sm text-zinc-500 dark:text-zinc-400 text-center py-8">' + (isName ? 'Type a name or email to search' : 'Choose a section to see its voters') + '</p>';
+    }
+
+    function loadSectionOptions(force) {
+        if (!lookupSectionSelect) return;
+        if (lookupSectionsLoaded && !force) return;
+        fetch(appUrl + '/admin/api/votes/sections', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.success || !lookupSectionSelect) return;
+            var previous = lookupSectionSelect.value;
+            var html = '<option value="">Select a section...</option>';
+            for (var i = 0; i < data.sections.length; i++) {
+                var s = data.sections[i];
+                html += '<option value="' + s.id + '">' + escapeHtml(s.name) + ' (' + s.voter_count + ' voter' + (s.voter_count !== 1 ? 's' : '') + ')</option>';
+            }
+            lookupSectionSelect.innerHTML = html;
+            lookupSectionSelect.value = previous;
+            lookupSectionsLoaded = true;
+        })
+        .catch(function() {
+            lookupSectionSelect.innerHTML = '<option value="">Could not load sections</option>';
+        });
+    }
+
+    function showSectionVoters(sectionId) {
+        if (!voteLookupResults) return;
+        if (!sectionId) {
+            voteLookupResults.innerHTML = '<p class="text-sm text-zinc-500 dark:text-zinc-400 text-center py-8">Choose a section to see its voters</p>';
+            return;
+        }
+        voteLookupResults.innerHTML = '<p class="text-sm text-zinc-500 dark:text-zinc-400 text-center py-8">Loading...</p>';
+        fetch(appUrl + '/admin/api/votes/search?section_id=' + encodeURIComponent(sectionId), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.success || !voteLookupResults) return;
+            if (!data.votes || data.votes.length === 0) {
+                voteLookupResults.innerHTML = '<p class="text-sm text-zinc-500 dark:text-zinc-400 text-center py-8">No voters in this section yet</p>';
+                return;
+            }
+            var html = '<p class="text-xs text-zinc-400 dark:text-zinc-500 px-2 pb-2">' + data.count + ' voter' + (data.count !== 1 ? 's' : '') + ' in this section</p>';
+            for (var i = 0; i < data.votes.length; i++) {
+                var v = data.votes[i];
+                html += '<div class="px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl border border-zinc-100 dark:border-zinc-800" data-voter-id="' + escapeHtml(v.voter_identifier) + '">';
+                html += '<p class="text-sm font-semibold text-zinc-900 dark:text-white">' + escapeHtml(v.voter_name) + '</p>';
+                html += '<p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">' + escapeHtml(v.email) + '</p>';
+                html += '<p class="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1">' + escapeHtml(v.voted_at) + '</p>';
+                html += '</div>';
+            }
+            voteLookupResults.innerHTML = html;
+            var sectionItems = voteLookupResults.querySelectorAll('[data-voter-id]');
+            for (var k = 0; k < sectionItems.length; k++) {
+                sectionItems[k].classList.add('cursor-pointer', 'hover:bg-zinc-100', 'dark:hover:bg-zinc-800', 'transition-colors', 'duration-200');
+                sectionItems[k].addEventListener('click', function() {
+                    var vid = this.getAttribute('data-voter-id');
+                    if (vid) showLookupDetail(vid);
+                });
+            }
+            lookupPreviousView = 'results';
+        })
+        .catch(function() {
+            if (voteLookupResults) voteLookupResults.innerHTML = '<p class="text-sm text-red-500 text-center py-8">Search failed</p>';
+        });
+    }
+
     function resetLookupModal() {
+        setLookupTab('name');
         if (voteLookupSearchInput) voteLookupSearchInput.value = '';
         if (voteLookupResults) voteLookupResults.innerHTML = '<p class="text-sm text-zinc-500 dark:text-zinc-400 text-center py-8">Type a name or email to search</p>';
         if (voteLookupBackBtn) voteLookupBackBtn.classList.add('hidden');
         if (voteLookupModalTitle) voteLookupModalTitle.textContent = 'Vote Lookup';
         lookupPreviousView = 'results';
+    }
+
+    function openSectionLookup(sectionId) {
+        openVoteLookupModal();
+        setLookupTab('section');
+        if (lookupSectionSelect) {
+            loadSectionOptions(true);
+            setTimeout(function() {
+                if (!lookupSectionSelect) return;
+                lookupSectionSelect.value = sectionId;
+                showSectionVoters(sectionId);
+            }, 300);
+        }
     }
 
     function openVoteLookupModal() {
@@ -673,7 +771,16 @@
     }
 
     // ===== RESULTS =====
+    function refreshLookupSections() {
+        if (!voteLookupModal || voteLookupModal.classList.contains('hidden')) return;
+        if (!lookupPanelSection || lookupPanelSection.classList.contains('hidden')) return;
+        loadSectionOptions(true);
+        var selected = lookupSectionSelect ? lookupSectionSelect.value : '';
+        if (selected) showSectionVoters(selected);
+    }
+
     function loadResults() {
+        refreshLookupSections();
         fetch(appUrl + '/admin/api/results', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
             .then(function(r) { return r.json(); })
             .then(function(data) {
@@ -1109,8 +1216,18 @@
         card.classList.remove('hidden');
         list.innerHTML = '';
         for (var i = 0; i < rows.length; i++) {
-            var item = document.createElement('div');
-            item.className = 'rounded-2xl ring-1 ring-zinc-200 dark:ring-zinc-700 p-3 sm:p-4 bg-zinc-50 dark:bg-zinc-800/60';
+            var item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'text-left rounded-2xl ring-1 ring-zinc-200 dark:ring-zinc-700 p-3 sm:p-4 bg-zinc-50 dark:bg-zinc-800/60 hover:ring-blue-500/50 hover:bg-white dark:hover:bg-zinc-800 transition-all cursor-pointer';
+            item.setAttribute('data-section-id', rows[i].id);
+            item.disabled = !!resultsHidden;
+            if (resultsHidden) {
+                item.className = item.className.replace('cursor-pointer', 'cursor-not-allowed opacity-70');
+            }
+            item.addEventListener('click', function() {
+                if (resultsHidden) return;
+                openSectionLookup(this.getAttribute('data-section-id'));
+            });
             var label = document.createElement('p');
             label.className = 'text-xs sm:text-sm font-semibold text-zinc-500 dark:text-zinc-400 truncate';
             label.textContent = rows[i].name;
@@ -1157,6 +1274,11 @@
         voteLookupResults = document.getElementById('voteLookupResults');
         voteLookupBackBtn = document.getElementById('voteLookupBackBtn');
         voteLookupModalTitle = document.getElementById('voteLookupModalTitle');
+        lookupTabName = document.getElementById('lookupTabName');
+        lookupTabSection = document.getElementById('lookupTabSection');
+        lookupPanelName = document.getElementById('lookupPanelName');
+        lookupPanelSection = document.getElementById('lookupPanelSection');
+        lookupSectionSelect = document.getElementById('lookupSectionSelect');
 
         scrollTopFab = document.getElementById('scrollTopFab');
         mainScrollContainer = document.querySelector('main');
@@ -1208,6 +1330,9 @@
         if (closeVoteLookupBtn) closeVoteLookupBtn.addEventListener('click', closeVoteLookupModal);
         if (voteLookupBackdrop) voteLookupBackdrop.addEventListener('click', closeVoteLookupModal);
         if (voteLookupBackBtn) voteLookupBackBtn.addEventListener('click', goBackToLookupResults);
+        if (lookupTabName) lookupTabName.addEventListener('click', function() { setLookupTab('name'); });
+        if (lookupTabSection) lookupTabSection.addEventListener('click', function() { setLookupTab('section'); });
+        if (lookupSectionSelect) lookupSectionSelect.addEventListener('change', function() { showSectionVoters(this.value); });
         if (voteLookupSearchInput) {
             voteLookupSearchInput.addEventListener('input', function() {
                 clearTimeout(lookupSearchTimeout);

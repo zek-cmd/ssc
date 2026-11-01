@@ -424,14 +424,28 @@ public function deleteElectionData() {
     
  public function searchVotes() {
     $query = trim($_GET['q'] ?? '');
-    
+    $sectionId = (int)($_GET['section_id'] ?? 0);
+    $pdo = Model::db();
+
+    // Voters of one section, with their count
+    if ($sectionId > 0) {
+        $stmt = $pdo->prepare("
+            SELECT id, voter_identifier, voter_name, email, voted_at
+            FROM votes
+            WHERE section_id = ?
+            ORDER BY voter_name ASC
+        ");
+        $stmt->execute([$sectionId]);
+        $votes = $stmt->fetchAll();
+        return $this->json(['success' => true, 'votes' => $votes, 'count' => count($votes)]);
+    }
+
     if (strlen($query) < 2) {
         return $this->json(['success' => true, 'votes' => []]);
     }
 
     $limit = $this->getLimit(20, 20);
     
-    $pdo = Model::db();
     $stmt = $pdo->prepare("
         SELECT id, voter_identifier, voter_name, email, voted_at 
         FROM votes 
@@ -446,6 +460,24 @@ public function deleteElectionData() {
     return $this->json(['success' => true, 'votes' => $votes]);
 }
     
+    // Sections with how many voters each one has
+    public function sectionVoterCounts() {
+        $rows = Model::db()->query("
+            SELECT s.id, s.name, COUNT(v.id) AS voter_count
+            FROM sections s
+            LEFT JOIN votes v ON v.section_id = s.id
+            GROUP BY s.id, s.name, s.sort_order
+            ORDER BY s.sort_order ASC, s.name ASC
+        ")->fetchAll();
+
+        return $this->json([
+            'success' => true,
+            'sections' => array_map(function($r) {
+                return ['id' => (int)$r['id'], 'name' => $r['name'], 'voter_count' => (int)$r['voter_count']];
+            }, $rows),
+        ]);
+    }
+
     public function voteDetail() {
         $voterIdentifier = $_GET['voter_id'] ?? '';
         

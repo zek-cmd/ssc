@@ -117,6 +117,11 @@ $extraMobileContent = '';
                             </button>
                         </div>
                         <div id="voteLookupContent" class="flex-1 overflow-y-auto px-4 py-4 sm:px-5 sm:py-5">
+                            <div class="flex gap-2 mb-4 p-1 rounded-2xl bg-zinc-100 dark:bg-zinc-800">
+                                <button type="button" id="lookupTabName" data-lookup-tab="name" class="flex-1 py-2 text-sm font-semibold rounded-xl bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm">Name and Email</button>
+                                <button type="button" id="lookupTabSection" data-lookup-tab="section" class="flex-1 py-2 text-sm font-semibold rounded-xl text-zinc-500 dark:text-zinc-400">Section</button>
+                            </div>
+                            <div id="lookupPanelName">
                             <div class="relative mb-4">
                                 <input 
                                     type="text" 
@@ -127,6 +132,13 @@ $extraMobileContent = '';
                                 <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                 </svg>
+                            </div>
+                            </div>
+                            <div id="lookupPanelSection" class="hidden mb-4">
+                                <label for="lookupSectionSelect" class="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Choose a section</label>
+                                <select id="lookupSectionSelect" class="w-full rounded-2xl border-0 py-3 px-4 text-sm sm:text-base text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800 ring-1 ring-zinc-200 dark:ring-zinc-700 focus:ring-2 focus:ring-blue-500/50">
+                                    <option value="">Loading sections...</option>
+                                </select>
                             </div>
                             <div id="voteLookupResults" class="space-y-1">
                                 <p class="text-sm text-zinc-500 dark:text-zinc-400 text-center py-8">Type a name or email to search</p>
