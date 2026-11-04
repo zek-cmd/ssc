@@ -23,5 +23,6 @@ Thumbs.db
 
 
 bak/
+backups/
 bin/
 candidate_images/
