@@ -10,6 +10,14 @@
                     <p class="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 font-medium">SOFTNET Information Technology Center, Inc.</p>
                 </div>
             </div>
+<?php if (!empty($headerBackUrl)): ?>
+            <a href="<?= htmlspecialchars($headerBackUrl) ?>" class="inline-flex items-center gap-2 px-3 py-2 sm:px-4 rounded-2xl text-xs sm:text-sm font-semibold text-zinc-700 dark:text-zinc-300 bg-white/70 dark:bg-zinc-800/70 ring-1 ring-zinc-200 dark:ring-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all duration-300 shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                <span>Home</span>
+            </a>
+<?php endif; ?>
         </div>
     </div>
 </header>

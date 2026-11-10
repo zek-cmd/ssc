@@ -1,4 +1,5 @@
 <div class="min-h-dvh flex flex-col bg-zinc-50 dark:bg-zinc-950">
+<?php $headerBackUrl = APP_URL . '/'; ?>
     <?php require APP_PATH . '/Views/public/partials/header.php'; ?>
 
     <main class="flex-1 px-0 py-6 sm:py-8">
