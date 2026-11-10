@@ -125,6 +125,27 @@ CREATE TABLE `security_events` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `sessions`
+-- Stores PHP sessions in the database so admins can list and revoke voter sessions
+--
+
+CREATE TABLE `sessions` (
+  `id` varchar(128) COLLATE utf8mb4_general_ci NOT NULL,
+  `payload` mediumtext COLLATE utf8mb4_general_ci NOT NULL,
+  `user_type` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'guest',
+  `user_id` int DEFAULT NULL,
+  `ip` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `user_agent` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `last_activity` int unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_sessions_last_activity` (`last_activity`),
+  KEY `idx_sessions_user_type` (`user_type`),
+  KEY `idx_sessions_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -454,13 +475,6 @@ ALTER TABLE `vote_details`
   ADD CONSTRAINT `vote_details_ibfk_1` FOREIGN KEY (`vote_id`) REFERENCES `votes` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `vote_details_ibfk_2` FOREIGN KEY (`position_id`) REFERENCES `positions` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `vote_details_ibfk_3` FOREIGN KEY (`candidate_id`) REFERENCES `candidates` (`id`) ON DELETE CASCADE;
-ALTER TABLE `partylists` ADD COLUMN `badge_color` VARCHAR(20) COLLATE utf8mb4_general_ci DEFAULT '#1e40af';
-ALTER TABLE `partylists` ADD COLUMN `badge_text_color` VARCHAR(20) COLLATE utf8mb4_general_ci DEFAULT '#ffffff';
-ALTER TABLE `users` ADD COLUMN `can_delete_election` TINYINT(1) NOT NULL DEFAULT '0';
-ALTER TABLE `users` ADD COLUMN `can_export_csv` TINYINT(1) NOT NULL DEFAULT '0';
-ALTER TABLE `users` ADD COLUMN `can_edit_info` TINYINT(1) NOT NULL DEFAULT '0';
-ALTER TABLE `users` ADD COLUMN `can_manage_vote` TINYINT(1) NOT NULL DEFAULT '0';
-ALTER TABLE `users` ADD COLUMN `can_manage_sessions` TINYINT(1) NOT NULL DEFAULT '0';
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
